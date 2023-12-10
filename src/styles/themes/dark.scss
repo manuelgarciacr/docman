@@ -1,0 +1,41 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@use "./_docman" as docman;
+// @use "../typography/config" as typography;
+// @use "../components";
+
+$dark-primary: mat.define-palette(docman.$palette);
+$dark-accent: mat.define-palette(docman.$palette, A200, A100, A400);
+$dark-warn: mat.define-palette(mat.$deep-orange-palette);
+//$dark-warn: mat.define-palette(mat.$yellow-palette);
+
+$dark-theme: mat.define-dark-theme(
+    (
+        color: (
+            primary: $dark-primary,
+            accent: $dark-accent,
+            warn: $dark-warn,
+        ),
+    )
+);
+
+$dark-success: mat.define-palette(mat.$light-green-palette);
+$dark-info: mat.define-palette(mat.$light-blue-palette);
+
+$dark-variants: (
+    success: $dark-success,
+    info: $dark-info,
+);
+
+.dark-theme {
+    @include mat.core-color($dark-theme);
+    @include mat.button-color($dark-theme);
+    background-color: red;
+    // @include components.theme(
+    //     $dark-theme,
+    //     typography.$typography,
+    //     $dark-variants
+    // );
+}
+

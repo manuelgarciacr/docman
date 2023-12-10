@@ -1,6 +1,9 @@
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
 @use "@angular/material" as mat;
+
+
+/*
 // Plus imports for other components in your app.
 
 // Include the common styles for Angular Material. We include this here so that you only
@@ -44,8 +47,6 @@ $docman-palette: (
     ),
 );
 
-// $docman-primary: mat.define-palette(mat.$indigo-palette);
-// $docman-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
 $docman-primary: mat.define-palette($docman-palette);
 $docman-accent: mat.define-palette($docman-palette, A200, A100, A400);
 // The warn palette is optional (defaults to red).
@@ -56,9 +57,9 @@ $docman-warn: mat.define-palette(mat.$red-palette);
 $docman-theme: mat.define-dark-theme(
     (
         color: (
-            primary: $docman--primary,
-            accent: $docman--accent,
-            warn: $docman--warn,
+            primary: $docman-primary,
+            accent: $docman-accent,
+            warn: $docman-warn,
         ),
         typography: mat.define-typography-config(),
         density: 0,
@@ -69,8 +70,48 @@ $docman-theme: mat.define-dark-theme(
 // that you are using.
 @include mat.core-theme($docman-theme);
 @include mat.all-component-themes($docman-theme);
+// .custom-theme {
+//     @include mat.button-theme($custom-theme);
+// }
 
+*/
 /* You can add global styles to this file, and also import other style files */
+
+@use "../src/styles/themes/light";
+// @use "../src/styles/themes/dark";
+// @use "../src/styles/components";
+@use "../src/styles/typography/config" as typography;
+
+@include mat.core();
+
+@include mat.core-theme(light.$light-theme);
+@include mat.button-theme(light.$light-theme);
+@include mat.typography-hierarchy(typography.$docman-typography);
+
+:root {
+    --system-preference: undefined
+}
+
+@media (prefers-color-scheme: light) {
+
+    :root {
+        --system-preference: light
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+        --system-preference: dark
+    }
+
+}
+
+// @include components.theme(
+//   light.$my-app-light-theme,
+//   typography.$my-app-typography,
+//   light.$my-app-light-variants
+// );
 
 html,
 body {

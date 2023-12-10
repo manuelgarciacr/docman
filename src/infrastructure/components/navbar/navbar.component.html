@@ -1,0 +1,92 @@
+<div class="navbar-container" [class.navbar-is-mobile]="isMobile">
+    <mat-toolbar color="primary" class="navbar-toolbar ">
+        <button mat-icon-button class="example-icon" [style.display]="isMobile ? 'block' : 'none'"
+            aria-label="Menu button" (click)="sidenav.toggle()">
+            <mat-icon>menu</mat-icon>
+        </button>
+        <h1 class="navbar-app-name">DocManager</h1>
+        <span class="example-spacer"></span>
+        <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="navbar-tabnav" [style.display]="isMobile ? 'none' : 'block'"
+            [backgroundColor]="'primary'">
+            @for (link of links; track link) {
+            <a mat-tab-link (click)="activeLink = link.path" [active]="activeLink == link.path" [routerLink]="link.path"
+                routerLinkActive="active" class="navbar-link text-capitalize">
+                {{link.path}}
+            </a>
+            }
+        </nav>
+        <toggle-theme (collapseNavbar)="isMenuCollapsed = true"></toggle-theme>
+        <!-- <div class="position-relative">
+            <login-control class="position-absolute"></login-control>
+        </div> -->
+        <!-- <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel> -->
+
+        <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
+            <mat-icon>favorite</mat-icon>
+        </button>
+        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+            <mat-icon>share</mat-icon>
+        </button>
+    </mat-toolbar>
+    <mat-sidenav-container class="navbar-sidenav-container" [style.marginTop.px]="isMobile ? 56 : 0">
+        <mat-sidenav #sidenav [mode]="isMobile ? 'over' : 'side'" [fixedInViewport]="isMobile" fixedTopGap="56">
+            <mat-nav-list>
+                @for (link of links; track link) {
+                <a mat-list-item routerLink="." class="text-capitalize">{{link.path}}</a>
+                }
+            </mat-nav-list>
+            <!-- <nav mat-tab-nav-bar [tabPanel]="tabPanel">
+            <a mat-tab-link *ngFor="let link of links" (click)="activeLink = link.path" [active]="activeLink == link.path"
+                [routerLink]="link.path" routerLinkActive="active" class="text-capitalize">
+                {{link.path}}
+            </a>
+        </nav> -->
+        </mat-sidenav>
+
+        <mat-sidenav-content>
+            <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
+            <!-- <p *ngFor="let content of fillerContent">{{content}}</p> -->
+        </mat-sidenav-content>
+    </mat-sidenav-container>
+</div>
+<!-- <nav class="navbar fixed-top navbar-expand-sm">
+    <div class="container-fluid">
+        <button
+            class="navbar-toggler"
+            (click)="isMenuCollapsed = !isMenuCollapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarTogglerDemo03"
+            aria-controls="navbarTogglerDemo03"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" href="#">Navbar</a>
+        <div
+            class="collapse navbar-collapse"
+            [ngbCollapse]="isMenuCollapsed"
+            id="navbarTogglerDemo03"
+        >
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item" *ngFor="let path of paths">
+                    <a
+                        class="nav-link"
+                        (click)="isMenuCollapsed = true"
+                        aria-current="page"
+                        [routerLink]="path.path"
+                        routerLinkActive="active"
+                        translate
+                        >ROUTES.{{path.data?.["trn"]}}</a
+                    >
+                </li>
+            </ul>
+
+            <login-control></login-control>
+            <toggle-lang (collapseNavbar)="isMenuCollapsed = true"></toggle-lang>
+            <toggle-theme (collapseNavbar)="isMenuCollapsed = true"></toggle-theme>
+
+        </div>
+    </div>
+</nav> -->

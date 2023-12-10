@@ -1,0 +1,9 @@
+:host {
+    display: block;
+    position: relative;
+    padding-top: 3rem;
+}
+
+p.cls-system-preference::after {
+    content: var(--system-preference)
+}

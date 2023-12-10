@@ -1,0 +1,29 @@
+@use "sass:map";
+@use "@angular/material" as mat;
+
+@use "./_docman" as docman;
+//@use "../typography/config" as typography;
+
+$light-primary: mat.define-palette(docman.$palette);
+$light-accent: mat.define-palette(docman.$palette, A200, A100, A400);
+$light-warn: mat.define-palette(mat.$red-palette);
+$light-warn: mat.define-palette(mat.$yellow-palette);
+
+$light-theme: mat.define-light-theme(
+    (
+        color: (
+            primary: $light-primary,
+            accent: $light-accent,
+            warn: $light-warn,
+        ),
+        //typography: typography.$docman-typography,
+    )
+);
+
+$light-success: mat.define-palette(mat.$green-palette);
+$light-info: mat.define-palette(mat.$blue-palette);
+
+$light-variants: (
+    success: $light-success,
+    info: $light-info,
+);
