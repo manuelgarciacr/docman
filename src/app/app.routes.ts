@@ -25,12 +25,20 @@ export const routes: Routes = [
     //     loadComponent: () => import("@app").then(c => c.RegisterComponent),
     //     data: { label: "Register" },
     // },
-
+    {
+        path: "test",
+        loadComponent: () => import("@app").then(c => c.TestComponent),
+        data: { trn: "Login" },
+    },
     // otherwise redirect to home or error page
     { path: "", redirectTo: "/login", pathMatch: "full" },
     {
         path: "**",
-        loadComponent: () => import("@app").then(c => {console.log("PEPE"); return c.E404Component}),
+        loadComponent: () =>
+            import("@app").then(c => {
+                console.log("PEPE");
+                return c.E404Component;
+            }),
     },
 ];
 

@@ -3,11 +3,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { BtnComponent } from '@infrastructure';
 
 @Component({
-    // selector: "app-login",
+    //selector: "app-test",
     standalone: true,
-    templateUrl: "./login.component.html",
-    styleUrl: "./login.component.scss",
+    imports: [BtnComponent,
+        MatButtonModule],
+    templateUrl: "./test.component.html",
+    styleUrl: "./test.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [BtnComponent, MatButtonModule],
 })
-export class LoginComponent {}
+export class TestComponent {}
