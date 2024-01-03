@@ -36,8 +36,15 @@
             ],
             "@environments": [
                 "environments/environment.ts"
+            ],
+            "@utils": [
+                "utils/index.ts"
             ]
         },
+        "typeRoots": [
+            "./node_modules/@types",
+            //"node_modules/@angular/material"
+        ],
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,

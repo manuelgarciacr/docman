@@ -20,6 +20,12 @@ $dark-theme: mat.define-dark-theme(
     )
 );
 
+//
+$background: map.get($dark-theme, background);
+$background-color: map-get($background, background);
+@debug $background-color;// #fafafa
+//
+
 $dark-success: mat.define-palette(mat.$light-green-palette);
 $dark-info: mat.define-palette(mat.$light-blue-palette);
 
@@ -31,6 +37,9 @@ $dark-variants: (
 .dark-theme {
     @include mat.core-color($dark-theme);
     @include mat.button-color($dark-theme);
+        @include mat.toolbar-color($dark-theme);
+    @include mat.tabs-color($dark-theme);
+
     background-color: red;
     // @include components.theme(
     //     $dark-theme,
