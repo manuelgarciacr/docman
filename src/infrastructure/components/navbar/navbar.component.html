@@ -1,7 +1,7 @@
 <div class="navbar-container" [class.navbar-is-mobile]="isMobile">
     <mat-toolbar color="primary" class="navbar-toolbar ">
         <button mat-icon-button class="example-icon" [style.display]="isMobile ? 'block' : 'none'"
-            aria-label="Menu button" (click)="sidenav.toggle()">
+            aria-label="Menu button" (click)="drawer.toggle()">
             <mat-icon>menu</mat-icon>
         </button>
         <h1 class="navbar-app-name">DocManager</h1>
@@ -15,21 +15,21 @@
             </a>
             }
         </nav>
-        <toggle-theme (collapseNavbar)="isMenuCollapsed = true"></toggle-theme>
+        <toggle-theme (collapseNavbar)="isMenuCollapsed = true" class="ms-auto"></toggle-theme>
         <!-- <div class="position-relative">
             <login-control class="position-absolute"></login-control>
         </div> -->
         <!-- <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel> -->
 
-        <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
+        <!-- <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
             <mat-icon>favorite</mat-icon>
         </button>
         <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
             <mat-icon>share</mat-icon>
-        </button>
+        </button> -->
     </mat-toolbar>
-    <mat-sidenav-container class="navbar-sidenav-container" [style.marginTop.px]="isMobile ? 56 : 0">
-        <mat-sidenav #sidenav [mode]="isMobile ? 'over' : 'side'" [fixedInViewport]="isMobile" fixedTopGap="56">
+    <mat-drawer-container class="navbar-sidenav-container" [hasBackdrop]="true" [style.marginTop.px]="isMobile ? 56 : 0">
+        <mat-drawer #drawer [mode]="isMobile ? 'over' : 'side'" fixedInViewport="isMobile" fixedTopGap="56">
             <mat-nav-list>
                 @for (link of links; track link) {
                 <a mat-list-item routerLink="." class="text-capitalize">{{link.path}}</a>
@@ -41,13 +41,14 @@
                 {{link.path}}
             </a>
         </nav> -->
-        </mat-sidenav>
+        </mat-drawer>
 
-        <mat-sidenav-content>
+        <mat-drawer-content>
+            <router-outlet></router-outlet>
             <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
             <!-- <p *ngFor="let content of fillerContent">{{content}}</p> -->
-        </mat-sidenav-content>
-    </mat-sidenav-container>
+        </mat-drawer-content>
+    </mat-drawer-container>
 </div>
 <!-- <nav class="navbar fixed-top navbar-expand-sm">
     <div class="container-fluid">

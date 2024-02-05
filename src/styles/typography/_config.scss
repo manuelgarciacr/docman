@@ -1,8 +1,9 @@
 @use "@angular/material" as mat;
 
 $heading-font-family: "'Montserrat', sans-serif";
-
+$regular-font-family: "Roboto, 'Helvetica Neue', sans-serif";
 $docman-typography: mat.define-typography-config(
+    $font-family: $regular-font-family,
     $headline-1: mat.define-typography-level(
         $font-family: $heading-font-family,
         $font-size: 6rem
@@ -26,6 +27,10 @@ $docman-typography: mat.define-typography-config(
     $headline-6: mat.define-typography-level(
         $font-family: $heading-font-family,
         $font-size: 1.25rem
+    ),
+    $subtitle-1: mat.define-typography-level(
+        $font-size: 1rem,
+        $line-height: 3.2rem
     ),
 );
 

@@ -1,1 +1,8 @@
-<button mat-raised-button color="primary" (click)="onClickButton($event)"><ng-content></ng-content></button>
+<button mat-raised-button
+    [type]="type"
+    [style.transform]="skew()"
+    color="primary"
+    (click)="onClickButton($event)"
+    class="w-100">
+    <ng-content></ng-content>
+</button>

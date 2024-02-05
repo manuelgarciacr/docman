@@ -3,9 +3,12 @@
 @use "@angular/material" as mat;
 
 
-/*
-// Plus imports for other components in your app.
 
+// Plus imports for other components in your app.
+@use "./app/account/login/login-theme" as login;
+@use "./infrastructure/components/btn/btn-theme" as btn;
+
+/*
 // Include the common styles for Angular Material. We include this here so that you only
 // have to load a single css file for Angular Material in your app.
 // Be sure that you only ever include this mixin once!
@@ -89,6 +92,11 @@ $docman-theme: mat.define-dark-theme(
 @include mat.toolbar-theme(light.$light-theme);
 @include mat.tabs-theme(light.$light-theme);
 @include mat.input-theme(light.$light-theme);
+@include mat.form-field-theme(light.$light-theme);
+@include mat.checkbox-theme(light.$light-theme);
+
+@include login.theme(light.$light-theme);
+@include btn.theme(light.$light-theme);
 
 @include mat.typography-hierarchy(typography.$docman-typography);
 
@@ -124,4 +132,5 @@ body {
 body {
     margin: 0;
     font-family: Roboto, "Helvetica Neue", sans-serif;
+    user-select: none;
 }

@@ -1,13 +1,17 @@
 @use "sass:map";
 @use "@angular/material" as mat;
 
+// Plus imports for other components in your app.
+@use "../../app/account/login/login-theme" as login;
+@use "../../infrastructure/components/btn/btn-theme" as btn;
+
 @use "./_docman" as docman;
 // @use "../typography/config" as typography;
 // @use "../components";
 
 $dark-primary: mat.define-palette(docman.$palette);
 $dark-accent: mat.define-palette(docman.$palette, A200, A100, A400);
-$dark-warn: mat.define-palette(mat.$deep-orange-palette);
+$dark-warn: mat.define-palette(mat.$orange-palette);
 //$dark-warn: mat.define-palette(mat.$yellow-palette);
 
 $dark-theme: mat.define-dark-theme(
@@ -37,10 +41,15 @@ $dark-variants: (
 .dark-theme {
     @include mat.core-color($dark-theme);
     @include mat.button-color($dark-theme);
-        @include mat.toolbar-color($dark-theme);
+    @include mat.toolbar-color($dark-theme);
     @include mat.tabs-color($dark-theme);
+    @include mat.input-color($dark-theme);
+    @include mat.form-field-color($dark-theme);
+    @include mat.checkbox-color($dark-theme);
 
-    background-color: red;
+    @include login.theme($dark-theme);
+    @include btn.theme($dark-theme);
+    //background-color: red;
     // @include components.theme(
     //     $dark-theme,
     //     typography.$typography,

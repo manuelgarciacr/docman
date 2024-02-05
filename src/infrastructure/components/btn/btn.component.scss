@@ -1,15 +1,7 @@
 :host {
-    display: block;
     button {
-        transform: skew(-30deg);
-        background: linear-gradient(90deg, rgba(82, 224, 224, 1) 68%, rgba(160, 237, 235, 1) 100%);
-        color: black;
+        //transform: skew(-15deg);
+        // background: linear-gradient(90deg, rgba(82, 224, 224, 1) 68%, rgba(160, 237, 235, 1) 100%);
+        // color: black;
     }
-}
-
-#parallelogram {
-    width: 150px;
-    height: 100px;
-    transform: skew(20deg);
-    background: red;
 }

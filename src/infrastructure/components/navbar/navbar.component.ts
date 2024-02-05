@@ -14,6 +14,7 @@ import { MediaMatcher } from "@angular/cdk/layout";
 import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatListModule } from "@angular/material/list";
 import { ToggleThemeComponent } from '@infrastructure';
+import { RouterOutlet } from "@angular/router";
 
 @Component({
     selector: "navbar",
@@ -39,6 +40,7 @@ import { ToggleThemeComponent } from '@infrastructure';
         MatSidenavModule,
         MatListModule,
         ToggleThemeComponent,
+        RouterOutlet
     ]
 })
 export class NavbarComponent implements OnInit {

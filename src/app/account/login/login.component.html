@@ -1,1 +1,127 @@
-<p>login works!</p>,
+<div>
+    <!-- <div mat-dialog-title class="dialog-title d-flex justify-content-between mt-3"> -->
+
+    <!-- <h2>{{data.action}} user</h2> -->
+    <!-- <h2>Login</h2> -->
+    <!-- <button mat-mini-fab aria-label="Close dialog" mat-dialog-close>
+        <mat-icon>close</mat-icon>
+    </button> -->
+    <!-- </div> -->
+    <!-- <mat-dialog-content> -->
+
+    <form [formGroup]="loginForm" color="primary" onsubmit="return false"
+        class="was-validated rounded-4 py-4 px-4 mt-3 mx-auto">
+        <mat-form-field class="w-100 mat-form-field">
+            <mat-label>Email address</mat-label>
+            <input type="email" matInput [readonly]="formDisabled"
+                [formControl]="getCtrl('email')" placeholder=""
+
+                aria-describedby="emailHelp" autocomplete="off">
+            <button type="button" [class.invisible]="!isSet('email')" matSuffix mat-icon-button
+                aria-label="Clear" [disabled]="formDisabled" (click)="set('email', '')" class="w-3 px-0">
+                <mat-icon>close</mat-icon>
+            </button>
+            <div id="emailHelp" class="form-text d-none">
+                We'll never share your email with anyone else.
+            </div>
+        </mat-form-field>
+        <mat-error style="height: auto" color="warn" *ngIf="getError('email')">{{getError('email')}}</mat-error>
+        <mat-form-field class="w-100 mat-form-field">
+            <mat-label>Password</mat-label>
+            <input [attr.type]="pwdState.type[pwdState.state]" matInput [readonly]="formDisabled"
+                [formControl]="getCtrl('password')" placeholder="********"
+                aria-describedby="passwordHelp" autocomplete="off">
+            <button type="button" [class.invisible]="!isSet('password')" matSuffix mat-icon-button
+                aria-label="Clear" [disabled]="formDisabled" (click)="set('password', '')" class="btn-clear">
+                <mat-icon>close</mat-icon>
+            </button>
+            <button type="button" *ngIf="pwdState.state == 0" matSuffix mat-icon-button
+                aria-label="pwdState.alt[pwdState.state]" [disabled]="formDisabled"
+                (click)="togglePwdState()" class="btn-pwd">
+                <mat-icon>visibility</mat-icon>
+            </button>
+            <button type="button" *ngIf="pwdState.state == 1" matSuffix mat-icon-button
+                aria-label="pwdState.alt[pwdState.state]" [disabled]="formDisabled"
+                (click)="togglePwdState()" class="btn-pwd">
+                <mat-icon>visibility_off</mat-icon>
+            </button>
+            <div id="passwordHelp" class="form-text d-none">
+                Minimum 8 characters and at least one digit, one special
+                character and one capital letter.
+            </div>
+        </mat-form-field>
+        <mat-error *ngIf="getError('password')">{{getError('password')}}</mat-error>
+        <mat-form-field class="w-100 mat-form-field">
+            <mat-label>Collection</mat-label>
+            <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('collection')" placeholder=""
+                aria-describedby="collectionHelp" autocomplete="off">
+            <button type="button" [class.invisible]="!isSet('collection')" matSuffix mat-icon-button
+                aria-label="Clear" [disabled]="formDisabled" (click)="set('collection', '')" class="w-3 px-0">
+                <mat-icon>close</mat-icon>
+            </button>
+            <div id="collectionHelp" class="form-text d-none">
+                Name of the collection to display.
+            </div>
+        </mat-form-field>
+        <mat-error *ngIf="getError('collection')">{{getError('collection')}}</mat-error>
+        <mat-checkbox>
+            Stay logged in
+        </mat-checkbox>
+        <div class="d-flex justify-content-between align-items-baseline">
+            <btn-component type="button" class="cls-forgotpwd">
+                Forgot password
+            </btn-component>
+            <btn-component type="button" class="cls-signup m-1">
+                Sign up
+            </btn-component>
+        </div>
+        <btn-component type="button" class="w-100 mt-2">
+            Log in
+        </btn-component>
+        <!-- <mat-form-field class="w-100">
+            <mat-label>First name</mat-label>
+            <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('firstName')"
+                placeholder="First name" aria-describedby="firstNameHelp" autocomplete="off">
+            <button type="button" [class.invisible]="!isSet('firstName')" matSuffix mat-icon-button aria-label="Clear"
+                [disabled]="formDisabled" (click)="set('firstName', '')">
+                <mat-icon>close</mat-icon>
+            </button>
+            <div id="firstNameHelp" class="form-text d-none">
+                First name.
+            </div>
+            <mat-error *ngIf="getError('firstName')">{{getError('firstName')}}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-100">
+            <mat-label>Last name</mat-label>
+            <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('lastName')"
+                placeholder="Last name" aria-describedby="lastNameHelp" autocomplete="off">
+            <button type="button" [class.invisible]="!isSet('lastName')" matSuffix mat-icon-button aria-label="Clear"
+                [disabled]="formDisabled" (click)="set('lastName', '')">
+                <mat-icon>close</mat-icon>
+            </button>
+            <div id="lastNameHelp" class="form-text d-none">
+                Last name.
+            </div>
+            <mat-error *ngIf="getError('lastName')">{{getError('lastName')}}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="col-sm-4 offset-sm-4">
+            <mat-label>Role</mat-label>
+            <mat-select required [formControl]="getCtrl('role')" [value]="get('role')"
+                [panelClass]="formDisabled ? 'user-component displayNone' : ''" aria-describedby="roleHelp">
+                <mat-option *ngFor="let role of roles" [value]="role.value">
+                    {{role.viewValue}}
+                </mat-option>
+            </mat-select>
+            <div id="roleHelp" class="form-text d-none">
+                Role within the company.
+            </div>
+        </mat-form-field> -->
+    </form>
+    <!-- </mat-dialog-content> -->
+    <!-- <mat-dialog-actions class="pb-4 pe-5" align="end"> -->
+    <!-- <button mat-raised-button mat-dialog-close color="warn" class="fs-2 h-d5">Cancel</button> -->
+    <!-- <button mat-raised-button cdkFocusInitial color="primary"
+        [disabled]="!formDisabled && (!userForm.valid || !areChanges())" class="fs-2 h-d5 action-btn user-component"
+        (click)="save()">{{ data.action }}</button> -->
+    <!-- </mat-dialog-actions> -->
+</div>
