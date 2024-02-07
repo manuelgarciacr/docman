@@ -1,0 +1,37 @@
+:host {
+    display: block;
+    position: relative;
+    form {
+        max-width: 26rem;
+        .btn-clear, .btn-pwd {
+            width: 2.5rem;
+        }
+        .cls-forgotpwd {
+            width: 60%
+        }
+        .cls-signup {
+            width: 40%
+        }
+    }
+    mat-error {
+        font-weight: bold;
+        margin-top: -30px;
+        margin-bottom: 9px; //Margin bottom - top must be 21px
+    }
+}
+.navbar-is-mobile form{
+    background-color: red;
+}
+// p.cls-system-preference::after {
+//     content: var(--system-preference)
+// }
+
+// .user-component {
+//     &.displayNone {
+//         display: none
+//     }
+//     &.action-btn>span::first-letter {
+//         text-transform: capitalize;
+//     }
+
+// }

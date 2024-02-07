@@ -1,8 +1,8 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, inject, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 // import { TranslateModule, TranslateService } from '@ngx-translate/core';
 // import { noDragging } from 'utils/noDragging';
-import { Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { routes } from 'app/app.routes';
 // import { ToggleThemeComponent } from "../toggle-theme/toggle-theme.component";
 // import { ToggleLangComponent } from "../toggle-lang/toggle-lang.component";
@@ -13,8 +13,9 @@ import { MatTabsModule } from "@angular/material/tabs";
 import { MediaMatcher } from "@angular/cdk/layout";
 import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatListModule } from "@angular/material/list";
-import { ToggleThemeComponent } from '@infrastructure';
+import { BtnComponent, ToggleThemeComponent } from '@infrastructure';
 import { RouterOutlet } from "@angular/router";
+import { Subscription, filter } from 'rxjs';
 
 @Component({
     selector: "navbar",
@@ -40,10 +41,18 @@ import { RouterOutlet } from "@angular/router";
         MatSidenavModule,
         MatListModule,
         ToggleThemeComponent,
-        RouterOutlet
-    ]
+        RouterOutlet,
+        BtnComponent,
+    ],
 })
 export class NavbarComponent implements OnInit {
+    private media = inject(MediaMatcher);
+    private matcher = this.media.matchMedia("(max-width: 600px)");
+    protected isMobile = signal(this.matcher.matches);
+    private matcherListener = (e: MediaQueryListEvent) =>
+        this.isMobile.set(e.matches ? true : false);
+    private router = inject(Router);
+    private routerSubscription: Subscription = new Subscription();
     protected isMenuCollapsed = true;
     // protected themeState = {
     //     svg: ["moon-stars-fill", "sun-fill"],
@@ -57,14 +66,14 @@ export class NavbarComponent implements OnInit {
     //     title: ["Set the english language", "Set the spanish language"],
     //     state: 0, // 0: English language set, the icon shows the spanish flag.
     // };
-    protected paths: Route[] = [];
+    //protected paths: Route[] = [];
     // protected links = routes
     //     .map(route => route.path)
     //     .filter(r => r != "" && r != "**"); //["Home", "Map", "Full Calendar", "Graphics"];
-    protected links;
-    protected activeLink;
-    protected isMobile = false;
-
+    protected links: Route[] = [];
+    protected activeLink = signal("");
+    protected hasBackBtn = () =>
+        this.isMobile() && this.activeLink() == "/signup";
     // constructor(
     //     //private conf: ConfigurationService,
     //     protected translate: TranslateService,
@@ -76,31 +85,31 @@ export class NavbarComponent implements OnInit {
     //     this.links = routes.filter(v => v.data?.["trn"] != undefined);
     //     this.activeLink = this.links[0];
     // }
-    constructor(
-        private router: Router,
-        // private _mobileQueryListener: () => void;
-        // protected translate: TranslateService,
-        changeDetectorRef: ChangeDetectorRef,
-        media: MediaMatcher,
-        private host: ElementRef
-    ) {
-        this.paths = routes.filter(v => v.data?.["trn"] != undefined);
-        this.links = routes.filter(v => v.data?.["trn"] != undefined);
-        this.activeLink = this.links[0].path;
-
-        const mobileQuery = media.matchMedia("(max-width: 600px)");
-        mobileQuery.onchange = e => (this.isMobile = e.matches ? true : false);
-
+    constructor() // protected translate: TranslateService, // private _mobileQueryListener: () => void;
+    // changeDetectorRef: ChangeDetectorRef,
+    // media: MediaMatcher,
+    // private host: ElementRef
+    {
         //this._mobileQueryListener = () => changeDetectorRef.detectChanges();
         //this.mobileQuery.addListener(this._mobileQueryListener);
     }
 
-    // ngOnDestroy(): void {
-    //     this.mobileQuery.removeListener(this._mobileQueryListener);
-    // }
-
     ngOnInit(): void {
         // noDragging(this.host);
+        this.matcher.addEventListener("change", this.matcherListener);
+        this.routerSubscription = this.router.events
+            .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+            .subscribe(e => {
+                this.activeLink.set(e.url);
+            });
+        //this.paths = routes.filter(v => v.data?.["trn"] != undefined);
+        this.links = routes.filter(v => v.data?.["trn"] != undefined);
+        //this.activeLink = this.links[0].path;
+    }
+
+    ngOnDestroy(): void {
+        this.matcher.removeEventListener("change", this.matcherListener);
+        this.routerSubscription.unsubscribe();
     }
 
     // protected toggleTheme() {

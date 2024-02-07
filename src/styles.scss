@@ -6,6 +6,7 @@
 
 // Plus imports for other components in your app.
 @use "./app/account/login/login-theme" as login;
+@use "./app/account/signup/signup-theme" as signup;
 @use "./infrastructure/components/btn/btn-theme" as btn;
 
 /*
@@ -96,6 +97,7 @@ $docman-theme: mat.define-dark-theme(
 @include mat.checkbox-theme(light.$light-theme);
 
 @include login.theme(light.$light-theme);
+@include signup.theme(light.$light-theme);
 @include btn.theme(light.$light-theme);
 
 @include mat.typography-hierarchy(typography.$docman-typography);

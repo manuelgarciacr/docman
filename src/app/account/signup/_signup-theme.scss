@@ -27,13 +27,8 @@
         mat.get-color-from-palette($primary-palette, 300, $exportBackgroundOpacity),
         mat.get-color-from-palette($primary-palette, 600));
     $error-color: mat.get-color-from-palette($warn-palette, "default");
-    app-login {
+    app-signup {
         form {
-            // @debug $is-dark-theme;
-            // @debug mat.get-color-from-palette($primary-palette, 300, $exportBackgroundOpacity);
-            // @debug mat.get-color-from-palette($primary-palette, 100);
-            // @debug $background-color;
-            // @debug $background-field-color;
             color: $color;
             background-color: $background-color;
             mat-form-field {
@@ -63,9 +58,6 @@
 
 @mixin typography($theme) {
     .doc-login-font-size {
-        //font-size: 1.5rem;
-        //font-size: 1rem;
-        //line-height: 3.2rem
         font: mat.get-theme-typography($theme, subtitle-1);
     }
 }

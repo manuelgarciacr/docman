@@ -18,17 +18,17 @@ export const routes: Routes = [
     {
         path: "login",
         loadComponent: () => import("@app").then(c => c.LoginComponent),
-        data: { trn: "Login" },
+        data: { trn: "Log in" },
     },
-    // {
-    //     path: "register",
-    //     loadComponent: () => import("@app").then(c => c.RegisterComponent),
-    //     data: { label: "Register" },
-    // },
+    {
+        path: "signup",
+        loadComponent: () => import("@app").then(c => c.SignupComponent),
+        data: { trn: "Sign up" },
+    },
     {
         path: "test",
         loadComponent: () => import("@app").then(c => c.TestComponent),
-        data: { trn: "Login" },
+        data: { trn: "Test" },
     },
     // otherwise redirect to home or error page
     { path: "", redirectTo: "/login", pathMatch: "full" },

@@ -45,23 +45,24 @@ import { BtnComponent } from "@infrastructure";
         ReactiveFormsModule,
         MatIconModule,
         MatButtonModule,
-        MatSelectModule,
+        // MatSelectModule,
         MatInputModule,
         MatFormFieldModule,
         MatCheckboxModule,
         MatDialogModule,
-        BtnComponent
-    ]
+        BtnComponent,
+    ],
 })
 export class LoginComponent implements OnInit {
     // private readonly repo = inject(UsersRepoService);
-    private readonly formBuilder = inject(FormBuilder);
+
     // protected data: {
     //     position: number;
     //     user: IUser;
     //     action: string;
     // } = inject(MAT_DIALOG_DATA);
     // protected data: string = inject(MAT_DIALOG_DATA);
+    private readonly formBuilder = inject(FormBuilder);
     protected loginForm: FormGroup = this.formBuilder.group({});
     protected pwdState = {
         type: ["password", "text"],
@@ -73,10 +74,9 @@ export class LoginComponent implements OnInit {
         state: 0,
     };
     protected formDisabled = false;
-    protected roles = ROLES;
+    //protected roles = ROLES;
 
-    constructor() //private dialog: MatDialog, // private dialogRef: MatDialogRef<UserComponent>, //private repo: UsersRepoService, //private formBuilder: FormBuilder,
-    // @Inject(MAT_DIALOG_DATA)
+    constructor() // @Inject(MAT_DIALOG_DATA) //private dialog: MatDialog, // private dialogRef: MatDialogRef<UserComponent>, //private repo: UsersRepoService, //private formBuilder: FormBuilder,
     // public data: {
     //     position: number;
     //     user: IUser;
@@ -104,6 +104,9 @@ export class LoginComponent implements OnInit {
             collection: new FormControl("", {
                 validators: [Validators.required, Validators.minLength(3)],
             }),
+            stayLoggedIn: new FormControl("", {
+
+            })
             // firstName: new FormControl("", {
             //     validators: [Validators.required],
             // }),
@@ -129,7 +132,7 @@ export class LoginComponent implements OnInit {
     protected getError = (field: string) => {
         const control = this.loginForm.get(field);
         const errors = control?.errors ?? {};
-console.log(field, control)
+        // console.log(field, control);
         if (Object.keys(errors).length === 0) return null;
         if (!control!.touched) return null;
         const subject =

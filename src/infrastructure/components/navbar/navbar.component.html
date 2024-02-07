@@ -1,18 +1,26 @@
-<div class="navbar-container" [class.navbar-is-mobile]="isMobile">
+<div class="navbar-container" [class.navbar-is-mobile]="isMobile()">
     <mat-toolbar color="primary" class="navbar-toolbar ">
-        <button mat-icon-button class="example-icon" [style.display]="isMobile ? 'block' : 'none'"
+        <!-- <button mat-icon-button [style.display]="isMobile ? 'block' : 'none'"
             aria-label="Menu button" (click)="drawer.toggle()">
             <mat-icon>menu</mat-icon>
-        </button>
+        </button> -->
+        <btn-component [style.display]="hasBackBtn() ? 'block' : 'none'"
+            [routerLink]="'/login'">
+            Back
+        </btn-component>
         <h1 class="navbar-app-name">DocManager</h1>
         <span class="example-spacer"></span>
-        <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="navbar-tabnav" [style.display]="isMobile ? 'none' : 'block'"
+        <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="navbar-tabnav" [style.display]="isMobile() ? 'none' : 'block'"
             [backgroundColor]="'primary'">
             @for (link of links; track link) {
-            <a mat-tab-link (click)="activeLink = link.path" [active]="activeLink == link.path" [routerLink]="link.path"
-                routerLinkActive="active" class="navbar-link text-capitalize">
-                {{link.path}}
-            </a>
+                <!-- <a mat-tab-link (click)="activeLink = link.path" [active]="activeLink == link.path" [routerLink]="link.path"
+                    routerLinkActive="active" class="navbar-link text-capitalize">
+                    {{link.path}}
+                </a> -->
+                <a mat-tab-link [active]="activeLink() == link.path" [routerLink]="link.path"
+                    routerLinkActive="active" class="navbar-link text-capitalize">
+                    {{link.path}}
+                </a>
             }
         </nav>
         <toggle-theme (collapseNavbar)="isMenuCollapsed = true" class="ms-auto"></toggle-theme>
@@ -28,11 +36,12 @@
             <mat-icon>share</mat-icon>
         </button> -->
     </mat-toolbar>
-    <mat-drawer-container class="navbar-sidenav-container" [hasBackdrop]="true" [style.marginTop.px]="isMobile ? 56 : 0">
-        <mat-drawer #drawer [mode]="isMobile ? 'over' : 'side'" fixedInViewport="isMobile" fixedTopGap="56">
+    <mat-drawer-container class="navbar-sidenav-container" [hasBackdrop]="true" [style.marginTop.px]="isMobile() ? 56 : 0">
+    <!-- <mat-drawer-container class="navbar-sidenav-container" [hasBackdrop]="true" > -->
+        <mat-drawer #drawer [mode]="isMobile() ? 'over' : 'side'" fixedInViewport="isMobile" fixedTopGap="56">
             <mat-nav-list>
                 @for (link of links; track link) {
-                <a mat-list-item routerLink="." class="text-capitalize">{{link.path}}</a>
+                    <a mat-list-item routerLink="." class="text-capitalize">{{link.path}}</a>
                 }
             </mat-nav-list>
             <!-- <nav mat-tab-nav-bar [tabPanel]="tabPanel">

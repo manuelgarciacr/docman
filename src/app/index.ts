@@ -1,3 +1,4 @@
+export * from "./account/signup/signup.component";
 export * from "./account/login/login.component";
 export * from "./e404/e404.component";
 export * from "./test/test.component";

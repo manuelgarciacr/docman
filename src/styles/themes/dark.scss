@@ -3,6 +3,7 @@
 
 // Plus imports for other components in your app.
 @use "../../app/account/login/login-theme" as login;
+@use "../../app/account/signup/signup-theme" as signup;
 @use "../../infrastructure/components/btn/btn-theme" as btn;
 
 @use "./_docman" as docman;
@@ -48,6 +49,7 @@ $dark-variants: (
     @include mat.checkbox-color($dark-theme);
 
     @include login.theme($dark-theme);
+    @include signup.theme($dark-theme);
     @include btn.theme($dark-theme);
     //background-color: red;
     // @include components.theme(

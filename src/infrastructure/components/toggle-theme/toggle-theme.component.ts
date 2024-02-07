@@ -2,11 +2,12 @@ import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 // import { CommonModule } from '@angular/common';
 import { ConfigurationService } from '@domain';
+import { BtnComponent } from '@infrastructure';
 
 @Component({
     selector: "toggle-theme",
     standalone: true,
-    imports: [MatButtonModule],
+    imports: [MatButtonModule, BtnComponent],
     templateUrl: "toggle-theme.component.html",
     styles: [],
 })
