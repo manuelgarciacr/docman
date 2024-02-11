@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit, inject, signal } from '@angular/core';
+import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 // import { TranslateModule, TranslateService } from '@ngx-translate/core';
 // import { noDragging } from 'utils/noDragging';
@@ -16,6 +16,7 @@ import { MatListModule } from "@angular/material/list";
 import { BtnComponent, ToggleThemeComponent } from '@infrastructure';
 import { RouterOutlet } from "@angular/router";
 import { Subscription, filter } from 'rxjs';
+import { SignupComponent } from '@app';
 
 @Component({
     selector: "navbar",
@@ -43,6 +44,7 @@ import { Subscription, filter } from 'rxjs';
         ToggleThemeComponent,
         RouterOutlet,
         BtnComponent,
+        SignupComponent,
     ],
 })
 export class NavbarComponent implements OnInit {
@@ -74,6 +76,8 @@ export class NavbarComponent implements OnInit {
     protected activeLink = signal("");
     protected hasBackBtn = () =>
         this.isMobile() && this.activeLink() == "/signup";
+    //@ViewChild("routeroutlettag", { static: true }) routeroutlet!: RouterOutlet;
+    protected signupComponent!: SignupComponent;
     // constructor(
     //     //private conf: ConfigurationService,
     //     protected translate: TranslateService,
@@ -85,11 +89,8 @@ export class NavbarComponent implements OnInit {
     //     this.links = routes.filter(v => v.data?.["trn"] != undefined);
     //     this.activeLink = this.links[0];
     // }
-    constructor() // protected translate: TranslateService, // private _mobileQueryListener: () => void;
-    // changeDetectorRef: ChangeDetectorRef,
-    // media: MediaMatcher,
-    // private host: ElementRef
-    {
+    constructor() {
+        // private host: ElementRef // media: MediaMatcher, // changeDetectorRef: ChangeDetectorRef, // protected translate: TranslateService, // private _mobileQueryListener: () => void;
         //this._mobileQueryListener = () => changeDetectorRef.detectChanges();
         //this.mobileQuery.addListener(this._mobileQueryListener);
     }
@@ -105,13 +106,29 @@ export class NavbarComponent implements OnInit {
         //this.paths = routes.filter(v => v.data?.["trn"] != undefined);
         this.links = routes.filter(v => v.data?.["trn"] != undefined);
         //this.activeLink = this.links[0].path;
+        console.log(this.signupComponent);
     }
+
+    // ngAfterContentInit(): void {
+    //     console.log("AC", this.routeroutlet);
+    // }
 
     ngOnDestroy(): void {
         this.matcher.removeEventListener("change", this.matcherListener);
         this.routerSubscription.unsubscribe();
     }
 
+    // protected callSetData = () => {
+    //     console.log("RO", this.routeroutlet);
+    //     console.log("ROC", this.routeroutlet.component);
+    //     //alert("WWWW");
+    //     const childcomp = this.routeroutlet.component as SignupComponent;
+    //     childcomp.setData();
+    // };
+
+    public onRouterOutletActivate(event: Component) {
+        this.signupComponent = event as SignupComponent;
+    }
     // protected toggleTheme() {
     //     this.setThemeState(this.conf.toggleTheme());
     // }

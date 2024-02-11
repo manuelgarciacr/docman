@@ -7,6 +7,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { CollectionService, ConfigurationService, ICollection, UserService } from '@domain';
 import { BtnComponent } from '@infrastructure';
 import { checkPasswordValidator } from '@utils';
 
@@ -31,12 +32,25 @@ import { checkPasswordValidator } from '@utils';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignupComponent implements OnInit, OnDestroy {
+    private readonly conf = inject(ConfigurationService);
+    private readonly formBuilder = inject(FormBuilder);
+    private readonly userService = inject(UserService);
+    private readonly collectionService = inject(CollectionService);
+    //private readonly user: IUser | null = null;
+    private readonly user = this.userService.getUser();
+    private collection: ICollection | null = null;
+    // private readonly userSubscription = this.userService.user$.subscribe(
+    //     user => (this.user = user)
+    // );
+    private collectionSubscription =
+        this.collectionService.collection$.subscribe(
+            collection => (this.collection = collection)
+        );
     private media = inject(MediaMatcher);
     private matcher = this.media.matchMedia("(max-width: 600px)");
     protected isMobile = signal(this.matcher.matches);
     private matcherListener = (e: MediaQueryListEvent) =>
         this.isMobile.set(e.matches ? true : false);
-    private readonly formBuilder = inject(FormBuilder);
     protected signupForm: FormGroup = this.formBuilder.group({});
     protected pwdState = {
         type: ["password", "text"],
@@ -51,26 +65,33 @@ export class SignupComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         const formGroup = {
-            firstName: new FormControl("", {
+            firstName: new FormControl(this.user?.firstName ?? "", {
                 validators: [Validators.required],
             }),
-            lastName: new FormControl("", {
+            lastName: new FormControl(this.user?.lastName ?? "", {
                 validators: [Validators.required],
             }),
-            email: new FormControl("", {
+            email: new FormControl(this.user?.email ?? "", {
                 validators: [Validators.required, Validators.email],
             }),
-            password: new FormControl("", {
+            password: new FormControl(this.user?.password ?? "", {
                 validators: [
                     Validators.required,
                     Validators.minLength(8),
                     checkPasswordValidator(),
                 ],
             }),
-            collection: new FormControl("", {
+            collection: new FormControl(this.collection?.name ?? "", {
                 validators: [Validators.required, Validators.minLength(3)],
             }),
-            stayLoggedIn: new FormControl("", {}),
+            description: new FormControl(
+                this.collection?.description ?? "",
+                {}
+            ),
+            stayLoggedIn: new FormControl(
+                this.conf.getConfig().stayLoggedIn,
+                {}
+            ),
         };
         this.signupForm = this.formBuilder.group(formGroup);
         this.matcher.addEventListener("change", this.matcherListener);
@@ -112,9 +133,45 @@ export class SignupComponent implements OnInit, OnDestroy {
         return subject + " is not valid.";
     };
 
-    protected togglePwdState() {
-        this.pwdState.state = 1 - this.pwdState.state;
-    }
+    protected togglePwdState = () => this.pwdState.state = 1 - this.pwdState.state;
+
+    setData = () => {
+        const stay = this.signupForm.get("stayLoggedIn")?.value ?? false;
+        let firstName = (this.signupForm.get("firstName")?.value as string)
+            .trim();
+        let lastName = (this.signupForm.get("lastName")?.value as string)
+            .trim();
+        let email = (this.signupForm.get("email")?.value as string)
+            .trim()
+            .toLowerCase();
+        let password = (this.signupForm.get("password")?.value as string);
+        let collection = (this.signupForm.get("collection")?.value as string)
+            .trim();
+        let description = (this.signupForm.get("description")?.value as string)
+            .trim();
+
+        if (this.getError("firstName")) firstName = "";
+        if (this.getError("lastName")) lastName = "";
+        if (this.getError("email")) email = "";
+        if (this.getError("password")) password = "";
+        if (this.getError("collection")) collection = "";
+        if (this.getError("description")) description = "";
+
+        this.userService.setUser({
+            email: email,
+            password: password,
+            firstName: firstName,
+            lastName: lastName,
+        });
+        this.collectionService.setCollection({
+            name: collection,
+            description: description,
+            users: email == "" ? [] : [email],
+            roles: email == "" ? [] : ["owner"],
+            documents: [],
+        });
+        this.conf.setStayLoggedIn(stay);
+    };
 
     protected getCtrl = (name: string) =>
         this.signupForm.get(name) as FormControl;

@@ -16,9 +16,9 @@
     // $color: if($is-dark-theme,
     //     map.get($foreground, "text"),
     //     mat.get-color-from-palette($primary-palette, "default-contrast"));
-    $color: if($is-dark-theme,
-        mat.get-color-from-palette($primary-palette, 300-contrast),
-        mat.get-color-from-palette($primary-palette, "default-contrast"));
+    // $color: if($is-dark-theme,
+    //     mat.get-color-from-palette($primary-palette, 300-contrast),
+    //     mat.get-color-from-palette($primary-palette, "default-contrast"));
 
     $background-color: if($is-dark-theme,
         mat.get-color-from-palette($primary-palette, 300, $exportBackgroundOpacity),
@@ -34,7 +34,7 @@
             // @debug mat.get-color-from-palette($primary-palette, 100);
             // @debug $background-color;
             // @debug $background-field-color;
-            color: $color;
+            color: white;
             background-color: $background-color;
             mat-form-field {
                 --mdc-filled-text-field-container-color: #{$background-field-color};

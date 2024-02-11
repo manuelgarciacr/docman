@@ -26,10 +26,18 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import { MatSelectModule } from "@angular/material/select";
-import { IUser, ROLES } from "@domain";
+import {
+    ConfigurationService,
+    ICollection,
+    IUser,
+    ROLES,
+    UserService,
+    CollectionService,
+} from "@domain";
 import { UsersRepoService } from "@infrastructure";
 import { checkPasswordValidator } from "@utils";
 import { BtnComponent } from "@infrastructure";
+import { Subscription } from "rxjs";
 //import * as bcrypt from "bcryptjs";
 
 @Component({
@@ -62,7 +70,20 @@ export class LoginComponent implements OnInit {
     //     action: string;
     // } = inject(MAT_DIALOG_DATA);
     // protected data: string = inject(MAT_DIALOG_DATA);
+    private readonly conf = inject(ConfigurationService);
     private readonly formBuilder = inject(FormBuilder);
+    private readonly userService = inject(UserService);
+    private readonly collectionService = inject(CollectionService);
+    //private readonly user: IUser | null = null;
+    private readonly user = this.userService.getUser();
+    private collection: ICollection | null = null;
+    // private readonly userSubscription = this.userService.user$.subscribe(
+    //     user => (this.user = user)
+    // );
+    private collectionSubscription =
+        this.collectionService.collection$.subscribe(
+            collection => (this.collection = collection)
+        );
     protected loginForm: FormGroup = this.formBuilder.group({});
     protected pwdState = {
         type: ["password", "text"],
@@ -76,14 +97,13 @@ export class LoginComponent implements OnInit {
     protected formDisabled = false;
     //protected roles = ROLES;
 
-    constructor() // @Inject(MAT_DIALOG_DATA) //private dialog: MatDialog, // private dialogRef: MatDialogRef<UserComponent>, //private repo: UsersRepoService, //private formBuilder: FormBuilder,
-    // public data: {
+    // constructor() // public data: { // @Inject(MAT_DIALOG_DATA) //private dialog: MatDialog, // private dialogRef: MatDialogRef<UserComponent>, //private repo: UsersRepoService, //private formBuilder: FormBuilder,
     //     position: number;
     //     user: IUser;
     //     action: string;
     // }
     // @Inject(MAT_DIALOG_DATA) public data: string
-    {}
+    // {}
 
     ngOnInit(): void {
         const formGroup = {
@@ -91,22 +111,23 @@ export class LoginComponent implements OnInit {
             // updatedAt: new FormControl(""),
             // createdAt: new FormControl(""),
             // __v: new FormControl(""),
-            email: new FormControl("", {
+            email: new FormControl(this.user?.email ?? "", {
                 validators: [Validators.required, Validators.email],
             }),
-            password: new FormControl("", {
+            password: new FormControl(this.user?.password ?? "", {
                 validators: [
                     Validators.required,
                     Validators.minLength(8),
                     checkPasswordValidator(),
                 ],
             }),
-            collection: new FormControl("", {
+            collection: new FormControl(this.collection?.name ?? "", {
                 validators: [Validators.required, Validators.minLength(3)],
             }),
-            stayLoggedIn: new FormControl("", {
-
-            })
+            stayLoggedIn: new FormControl(
+                this.conf.getConfig().stayLoggedIn,
+                {}
+            ),
             // firstName: new FormControl("", {
             //     validators: [Validators.required],
             // }),
@@ -247,9 +268,8 @@ export class LoginComponent implements OnInit {
         // });
     };
 */
-    togglePwdState() {
-        this.pwdState.state = 1 - this.pwdState.state;
-    }
+    protected togglePwdState = () => this.pwdState.state = 1 - this.pwdState.state;
+
     /*
 
     getCtrl = (name: string) => this.userForm.get(name) as FormControl;
@@ -262,8 +282,39 @@ export class LoginComponent implements OnInit {
         const b = this.data.user;
         return Object.keys(a).some(key => a[key] !== b[key as keyof IUser]);
     }; */
-    getCtrl = (name: string) => this.loginForm.get(name) as FormControl;
-    isSet = (name: string) => this.loginForm.get(name)?.value != "";
-    set = (name: string, val: unknown) =>
+
+    protected setData = () => {
+        const stay = this.loginForm.get("stayLoggedIn")?.value ?? false;
+        let email = (this.loginForm.get("email")?.value as string)
+            .trim()
+            .toLowerCase();
+        let password = (this.loginForm.get("password")?.value as string);
+        let collection = (this.loginForm.get("collection")?.value as string)
+            .trim();
+
+        if (this.getError("email")) email = "";
+        if (this.getError("password")) password = "";
+        if (this.getError("collection")) collection = "";
+
+        this.userService.setUser({
+            email: email,
+            password: password,
+            firstName: this.user?.firstName ?? "",
+            lastName: this.user?.lastName ?? ""
+        });
+        this.collectionService.setCollection({
+            name: collection,
+            description: this.collection?.description ?? "",
+            users: email == "" ? [] : [email],
+            roles: email == "" ? [] : ["owner"],
+            documents: [],
+        });
+        this.conf.setStayLoggedIn(stay);
+    };
+
+    protected getCtrl = (name: string) =>
+        this.loginForm.get(name) as FormControl;
+    protected isSet = (name: string) => this.loginForm.get(name)?.value != "";
+    protected set = (name: string, val: unknown) =>
         this.loginForm.get(name)?.setValue(val);
 }

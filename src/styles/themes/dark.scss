@@ -42,6 +42,7 @@ $dark-variants: (
 .dark-theme {
     @include mat.core-color($dark-theme);
     @include mat.button-color($dark-theme);
+    @include mat.icon-button-color($dark-theme);
     @include mat.toolbar-color($dark-theme);
     @include mat.tabs-color($dark-theme);
     @include mat.input-color($dark-theme);

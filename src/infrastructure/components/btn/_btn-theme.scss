@@ -16,18 +16,29 @@
         mat.get-color-from-palette($primary-palette, 400-contrast),
         mat.get-color-from-palette($primary-palette, A400-contrast));
     btn-component {
+        &[type=button][ng-reflect-disabled=true] {
+            cursor: default;
+        }
         button {
-            background: linear-gradient(
-                90deg,
-                rgba(82, 224, 224, 1) 68%,
-                rgba(160, 237, 235, 1) 100%
-            )!important;
+            // background: linear-gradient(
+            //     90deg,
+            //     rgba(82, 224, 224, 1) 68%,
+            //     rgba(160, 237, 235, 1) 100%
+            // )!important;
             background: linear-gradient(
                 90deg,
                 $background-color 68%,
                 $background-light-color 100%
             )!important;
             color: $color!important;
+            &.mat-mdc-raised-button[disabled] {
+                background: linear-gradient(
+                    90deg,
+                    gray 68%,
+                    lightgray 100%
+                )!important;
+                cursor: default!important;
+            }
         }
     }
 }

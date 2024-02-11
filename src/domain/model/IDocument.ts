@@ -1,11 +1,8 @@
 export interface IDocument {
-    _id?: string;
+    // _id?: string;
     name: string;
-    description: string;
-    owner: string;
-    users: string[]; // owner is included
-    documents: IDocument[];
-    createdAt: string;
-    updatedAt: string;
-    __v: string;
+    folder: string;
+    // createdAt: string;
+    // updatedAt: string;
+    // __v: string;
 }

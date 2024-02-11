@@ -23,7 +23,6 @@ export class ToggleThemeComponent implements OnInit {
     };
 
     ngOnInit(): void {
-console.log("OI")
         const theme = this.conf.getConfig().theme;
         const state = this.themeState.theme.indexOf(theme);
         this.themeState.state = state;

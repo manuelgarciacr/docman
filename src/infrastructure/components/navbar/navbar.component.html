@@ -5,7 +5,8 @@
             <mat-icon>menu</mat-icon>
         </button> -->
         <btn-component [style.display]="hasBackBtn() ? 'block' : 'none'"
-            [routerLink]="'/login'">
+            [routerLink]="'/login'"
+            (click)="signupComponent.setData()">
             Back
         </btn-component>
         <h1 class="navbar-app-name">DocManager</h1>
@@ -53,7 +54,8 @@
         </mat-drawer>
 
         <mat-drawer-content>
-            <router-outlet></router-outlet>
+            <router-outlet #routeroutlettag
+                 (activate)="onRouterOutletActivate($event)"></router-outlet>
             <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
             <!-- <p *ngFor="let content of fillerContent">{{content}}</p> -->
         </mat-drawer-content>

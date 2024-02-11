@@ -2,10 +2,11 @@
     <form [formGroup]="signupForm" color="primary" onsubmit="return false"
         class="was-validated rounded-4 py-4 px-4 mt-3 mx-auto">
         <btn-component type="button" [routerLink]="'/login'"
+            (click)="setData()"
             [style.display]="isMobile() ? 'none' : 'inline-block'" class="mb-4">
             Back
         </btn-component>
-        <mat-form-field class="w-100 mat-form-field">
+        <mat-form-field class="w-100">
             <mat-label>First name</mat-label>
             <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('firstName')" placeholder=""
                 aria-describedby="firstNameHelp" autocomplete="on">
@@ -18,7 +19,7 @@
             </div>
         </mat-form-field>
         <mat-error *ngIf="getError('firstName')">{{getError('firstName')}}</mat-error>
-        <mat-form-field class="w-100 mat-form-field">
+        <mat-form-field class="w-100">
             <mat-label>Last name</mat-label>
             <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('lastName')" placeholder=""
                 aria-describedby="lastNameHelp" autocomplete="on">
@@ -31,7 +32,7 @@
             </div>
         </mat-form-field>
         <mat-error *ngIf="getError('lastName')">{{getError('lastName')}}</mat-error>
-        <mat-form-field class="w-100 mat-form-field">
+        <mat-form-field class="w-100">
             <mat-label>Email address</mat-label>
             <input type="email" matInput [readonly]="formDisabled" [formControl]="getCtrl('email')" placeholder=""
                 aria-describedby="emailHelp" autocomplete="off">
@@ -40,11 +41,11 @@
                 <mat-icon>close</mat-icon>
             </button>
             <div id="emailHelp" class="form-text d-none">
-                We'll never share your email with anyone else.
+                We'll never share your email with anyone else. Email address must be unique.
             </div>
         </mat-form-field>
         <mat-error style="height: auto" color="warn" *ngIf="getError('email')">{{getError('email')}}</mat-error>
-        <mat-form-field class="w-100 mat-form-field">
+        <mat-form-field class="w-100">
             <mat-label>Password</mat-label>
             <input [attr.type]="pwdState.type[pwdState.state]" matInput [readonly]="formDisabled"
                 [formControl]="getCtrl('password')" placeholder="********" aria-describedby="passwordHelp"
@@ -69,7 +70,7 @@
             </div>
         </mat-form-field>
         <mat-error *ngIf="getError('password')">{{getError('password')}}</mat-error>
-        <mat-form-field class="w-100 mat-form-field">
+        <mat-form-field class="w-100">
             <mat-label>Collection</mat-label>
             <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('collection')" placeholder=""
                 aria-describedby="collectionHelp" autocomplete="off">
@@ -78,16 +79,26 @@
                 <mat-icon>close</mat-icon>
             </button>
             <div id="collectionHelp" class="form-text d-none">
-                Name of the collection to display.
+                Name of the collection to display. The collection name must be unique. You can use a format like 'your-company/collection-name'.
             </div>
         </mat-form-field>
         <mat-error *ngIf="getError('collection')">{{getError('collection')}}</mat-error>
-        <div class="w-100 mat-form-field">
-            <mat-checkbox>
-                Stay logged in
-            </mat-checkbox>
-        </div>
-        <btn-component type="button" class="w-100 mt-4">
+        <mat-form-field class="w-100">
+            <mat-label>Collection description</mat-label>
+            <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('description')" placeholder=""
+                aria-describedby="descriptionHelp" autocomplete="off">
+            <button type="button" [class.invisible]="!isSet('description')" matSuffix mat-icon-button aria-label="Clear"
+                [disabled]="formDisabled" (click)="set('description', '')" class="w-3 px-0">
+                <mat-icon>close</mat-icon>
+            </button>
+            <div id="descriptionHelp" class="form-text d-none">
+                A brief description of the collection of documents.
+            </div>
+        </mat-form-field>
+        <mat-checkbox formControlName="stayLoggedIn">
+            Stay logged in
+        </mat-checkbox>
+        <btn-component type="button" [disabled]="!signupForm.valid" class="w-100 mt-4">
             Sign up
         </btn-component>
         <!-- <mat-form-field class="w-100">

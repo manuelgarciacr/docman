@@ -11,7 +11,7 @@
 
     <form [formGroup]="loginForm" color="primary" onsubmit="return false"
         class="was-validated rounded-4 py-4 px-4 mt-3 mx-auto">
-        <mat-form-field class="w-100 mat-form-field">
+        <mat-form-field class="w-100">
             <mat-label>Email address</mat-label>
             <input type="email" matInput [readonly]="formDisabled"
                 [formControl]="getCtrl('email')" placeholder=""
@@ -22,11 +22,11 @@
                 <mat-icon>close</mat-icon>
             </button>
             <div id="emailHelp" class="form-text d-none">
-                We'll never share your email with anyone else.
+                We'll never share your email with anyone else. Email address must be unique.
             </div>
         </mat-form-field>
         <mat-error style="height: auto" color="warn" *ngIf="getError('email')">{{getError('email')}}</mat-error>
-        <mat-form-field class="w-100 mat-form-field">
+        <mat-form-field class="w-100">
             <mat-label>Password</mat-label>
             <input [attr.type]="pwdState.type[pwdState.state]" matInput [readonly]="formDisabled"
                 [formControl]="getCtrl('password')" placeholder="********"
@@ -51,7 +51,7 @@
             </div>
         </mat-form-field>
         <mat-error *ngIf="getError('password')">{{getError('password')}}</mat-error>
-        <mat-form-field class="w-100 mat-form-field">
+        <mat-form-field class="w-100">
             <mat-label>Collection</mat-label>
             <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('collection')" placeholder=""
                 aria-describedby="collectionHelp" autocomplete="off">
@@ -60,22 +60,22 @@
                 <mat-icon>close</mat-icon>
             </button>
             <div id="collectionHelp" class="form-text d-none">
-                Name of the collection to display.
+                Name of the collection to display. The collection name must be unique. You can use a format like 'your-company/collection-name'.
             </div>
         </mat-form-field>
         <mat-error *ngIf="getError('collection')">{{getError('collection')}}</mat-error>
-        <mat-checkbox>
+        <mat-checkbox formControlName="stayLoggedIn">
             Stay logged in
         </mat-checkbox>
         <div class="d-flex justify-content-between align-items-baseline">
             <btn-component type="button" class="cls-forgotpwd">
                 Forgot password
             </btn-component>
-            <btn-component type="button" [routerLink]="'/signup'" class="cls-signup m-1">
+            <btn-component type="button" (click)="setData()" [routerLink]="'/signup'" class="cls-signup m-1">
                 Sign up
             </btn-component>
         </div>
-        <btn-component type="button" class="w-100 mt-2">
+        <btn-component type="button"  [disabled]="!loginForm.valid" class="w-100 mt-2">
             Log in
         </btn-component>
         <!-- <mat-form-field class="w-100">

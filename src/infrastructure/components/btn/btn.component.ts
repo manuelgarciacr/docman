@@ -14,7 +14,8 @@ export class BtnComponent implements AfterViewInit {
     @Output() click = new EventEmitter<MouseEvent>();
     @Input() type: string = "button";
     @Input() degree: string = "15";
-    @Input() routerLink: string = "";
+    @Input() routerLink: string | null = null;
+    @Input() disabled: boolean = false;
     protected skew = () => `skew(-${this.degree}deg)`;
     private element = inject(ElementRef);
 
