@@ -1,15 +1,16 @@
 import { MediaMatcher } from '@angular/cdk/layout';
 import { NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { Router } from '@angular/router';
 import { CollectionService, ConfigurationService, ICollection, UserService } from '@domain';
-import { BtnComponent } from '@infrastructure';
-import { checkPasswordValidator } from '@utils';
+import { AccountRepoService, BtnComponent } from '@infrastructure';
+import { UniqueCollectionValidator, UniqueEmailValidator, passwordValidator, ltrimFormControl, trimFormControl } from '@utils';
 
 @Component({
     selector: "app-signup",
@@ -31,12 +32,20 @@ import { checkPasswordValidator } from '@utils';
     styleUrl: "./signup.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SignupComponent implements OnInit, OnDestroy {
+export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
+    @ViewChild("firstItem") firstItem!: ElementRef;
+    private readonly router = inject(Router);
+    private readonly repo = inject(AccountRepoService);
     private readonly conf = inject(ConfigurationService);
     private readonly formBuilder = inject(FormBuilder);
     private readonly userService = inject(UserService);
     private readonly collectionService = inject(CollectionService);
+    private readonly uniqueEmailValidator = inject(UniqueEmailValidator);
+    private readonly uniqueCollectionValidator = inject(
+        UniqueCollectionValidator
+    );
     //private readonly user: IUser | null = null;
+    private loading = signal(false);
     private readonly user = this.userService.getUser();
     private collection: ICollection | null = null;
     // private readonly userSubscription = this.userService.user$.subscribe(
@@ -66,28 +75,47 @@ export class SignupComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         const formGroup = {
             firstName: new FormControl(this.user?.firstName ?? "", {
-                validators: [Validators.required],
+                validators: [ltrimFormControl, Validators.required],
             }),
             lastName: new FormControl(this.user?.lastName ?? "", {
-                validators: [Validators.required],
+                validators: [ltrimFormControl, Validators.required],
             }),
             email: new FormControl(this.user?.email ?? "", {
-                validators: [Validators.required, Validators.email],
+                validators: [
+                    trimFormControl,
+                    Validators.required,
+                    Validators.email,
+                ],
+                asyncValidators: [
+                    this.uniqueEmailValidator.validate.bind(
+                        this.uniqueEmailValidator
+                    ),
+                ],
+                //updateOn: "submit",
             }),
             password: new FormControl(this.user?.password ?? "", {
                 validators: [
                     Validators.required,
                     Validators.minLength(8),
-                    checkPasswordValidator(),
+                    passwordValidator(),
                 ],
             }),
             collection: new FormControl(this.collection?.name ?? "", {
-                validators: [Validators.required, Validators.minLength(3)],
+                validators: [
+                    ltrimFormControl,
+                    Validators.required,
+                    Validators.minLength(3),
+                ],
+                asyncValidators: [
+                    this.uniqueCollectionValidator.validate.bind(
+                        this.uniqueCollectionValidator
+                    ),
+                ],
+                //updateOn: "submit",
             }),
-            description: new FormControl(
-                this.collection?.description ?? "",
-                {}
-            ),
+            description: new FormControl(this.collection?.description ?? "", {
+                validators: [ltrimFormControl],
+            }),
             stayLoggedIn: new FormControl(
                 this.conf.getConfig().stayLoggedIn,
                 {}
@@ -95,6 +123,12 @@ export class SignupComponent implements OnInit, OnDestroy {
         };
         this.signupForm = this.formBuilder.group(formGroup);
         this.matcher.addEventListener("change", this.matcherListener);
+    }
+
+    ngAfterViewInit(): void {
+        setTimeout(() => {
+            this.firstItem.nativeElement.focus();
+        }, 0);
     }
 
     ngOnDestroy(): void {
@@ -130,32 +164,27 @@ export class SignupComponent implements OnInit, OnDestroy {
                 subject +
                 " must have at least one lowercase letter, one uppercase letter, one digit, and one special character."
             );
+
+        if (errors["unique"]) return subject + " already exists.";
+
         return subject + " is not valid.";
     };
 
-    protected togglePwdState = () => this.pwdState.state = 1 - this.pwdState.state;
+    protected togglePwdState = () =>
+        (this.pwdState.state = 1 - this.pwdState.state);
 
     setData = () => {
-        const stay = this.signupForm.get("stayLoggedIn")?.value ?? false;
-        let firstName = (this.signupForm.get("firstName")?.value as string)
-            .trim();
-        let lastName = (this.signupForm.get("lastName")?.value as string)
-            .trim();
-        let email = (this.signupForm.get("email")?.value as string)
-            .trim()
-            .toLowerCase();
-        let password = (this.signupForm.get("password")?.value as string);
-        let collection = (this.signupForm.get("collection")?.value as string)
-            .trim();
-        let description = (this.signupForm.get("description")?.value as string)
-            .trim();
+        const stay = this.getValue("stayLoggedIn") ?? false;
+        const firstName = this.trimValue("firstName");
+        const lastName = this.trimValue("lastName");
+        let email = this.trimValue("email").toLowerCase();
+        let password = this.getValue("password") as string;
+        let collection = this.trimValue("collection");
+        const description = this.trimValue("description");
 
-        if (this.getError("firstName")) firstName = "";
-        if (this.getError("lastName")) lastName = "";
         if (this.getError("email")) email = "";
         if (this.getError("password")) password = "";
         if (this.getError("collection")) collection = "";
-        if (this.getError("description")) description = "";
 
         this.userService.setUser({
             email: email,
@@ -166,16 +195,44 @@ export class SignupComponent implements OnInit, OnDestroy {
         this.collectionService.setCollection({
             name: collection,
             description: description,
-            users: email == "" ? [] : [email],
-            roles: email == "" ? [] : ["owner"],
+            users: [],
+            roles: [],
             documents: [],
         });
         this.conf.setStayLoggedIn(stay);
     };
 
+    protected signup = () => {
+        this.setData();
+        const user = this.userService.getUser()!;
+        const collection = this.collectionService.getCollection()!;
+
+        collection!.users = [];
+        collection!.roles = [];
+        collection!.documents = [];
+
+        this.loading.set(true);
+        this.repo.signup({ user, collection}).subscribe({
+            //this.starships.push(...(resp.body ? resp.body.results : []));
+            //this.nextPage = resp.body?.next || null;
+            next: resp => {
+                console.log(resp);
+                this.router.navigateByUrl("test")//, { replaceUrl: true });
+            },
+            error: err => console.error("SIGNUP ERROR", err),
+            complete: () => this.loading.set(false)
+        });
+    };
+
+    private getValue = (name: string) => this.signupForm.get(name)?.value;
+    private trimValue = (name: string) => {
+        const v = (this.getValue(name) as string).trim();
+        this.set(name, v);
+        return v;
+    };
     protected getCtrl = (name: string) =>
         this.signupForm.get(name) as FormControl;
-    protected isSet = (name: string) => this.signupForm.get(name)?.value != "";
+    protected isSet = (name: string) => this.getValue(name) != "";
     protected set = (name: string, val: unknown) =>
         this.signupForm.get(name)?.setValue(val);
 }

@@ -38,6 +38,7 @@
             background-color: $background-color;
             mat-form-field {
                 --mdc-filled-text-field-container-color: #{$background-field-color};
+                --mdc-filled-text-field-caret-color: white;
                 --mdc-filled-text-field-label-text-color: white;
                 --mdc-filled-text-field-focus-label-text-color: white;
                 --mdc-filled-text-field-active-indicator-color: white;

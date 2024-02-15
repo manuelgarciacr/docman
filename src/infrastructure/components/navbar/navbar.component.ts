@@ -1,8 +1,8 @@
-import { AfterContentInit, ChangeDetectorRef, Component, ContentChild, ElementRef, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 // import { TranslateModule, TranslateService } from '@ngx-translate/core';
 // import { noDragging } from 'utils/noDragging';
-import { ActivatedRoute, NavigationEnd, Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { routes } from 'app/app.routes';
 // import { ToggleThemeComponent } from "../toggle-theme/toggle-theme.component";
 // import { ToggleLangComponent } from "../toggle-lang/toggle-lang.component";
@@ -48,6 +48,7 @@ import { SignupComponent } from '@app';
     ],
 })
 export class NavbarComponent implements OnInit {
+    protected accounting = signal(false);
     private media = inject(MediaMatcher);
     private matcher = this.media.matchMedia("(max-width: 600px)");
     protected isMobile = signal(this.matcher.matches);
@@ -102,11 +103,13 @@ export class NavbarComponent implements OnInit {
             .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
             .subscribe(e => {
                 this.activeLink.set(e.url);
+                const route = routes.find(v => e.url.endsWith(v.path!));
+                this.accounting.set(route?.data?.["accounting"] ?? false);
+                console.log("LNK", e, route, this.accounting())
             });
         //this.paths = routes.filter(v => v.data?.["trn"] != undefined);
         this.links = routes.filter(v => v.data?.["trn"] != undefined);
         //this.activeLink = this.links[0].path;
-        console.log(this.signupComponent);
     }
 
     // ngAfterContentInit(): void {

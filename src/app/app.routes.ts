@@ -18,12 +18,12 @@ export const routes: Routes = [
     {
         path: "login",
         loadComponent: () => import("@app").then(c => c.LoginComponent),
-        data: { trn: "Log in" },
+        data: { accounting: true },
     },
     {
         path: "signup",
         loadComponent: () => import("@app").then(c => c.SignupComponent),
-        data: { trn: "Sign up" },
+        data: { accounting: true },
     },
     {
         path: "test",

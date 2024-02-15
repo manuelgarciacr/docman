@@ -2,14 +2,14 @@
     <form [formGroup]="signupForm" color="primary" onsubmit="return false"
         class="was-validated rounded-4 py-4 px-4 mt-3 mx-auto">
         <btn-component type="button" [routerLink]="'/login'"
-            (click)="setData()"
+            (click2)="setData()"
             [style.display]="isMobile() ? 'none' : 'inline-block'" class="mb-4">
             Back
         </btn-component>
         <mat-form-field class="w-100">
             <mat-label>First name</mat-label>
             <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('firstName')" placeholder=""
-                aria-describedby="firstNameHelp" autocomplete="on">
+                aria-describedby="firstNameHelp" autocomplete="given-name" #firstItem>
             <button type="button" [class.invisible]="!isSet('firstName')" matSuffix mat-icon-button aria-label="Clear"
                 [disabled]="formDisabled" (click)="set('firstName', '')" class="w-3 px-0">
                 <mat-icon>close</mat-icon>
@@ -22,7 +22,7 @@
         <mat-form-field class="w-100">
             <mat-label>Last name</mat-label>
             <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('lastName')" placeholder=""
-                aria-describedby="lastNameHelp" autocomplete="on">
+                aria-describedby="lastNameHelp" autocomplete="family-name">
             <button type="button" [class.invisible]="!isSet('lastName')" matSuffix mat-icon-button aria-label="Clear"
                 [disabled]="formDisabled" (click)="set('lastName', '')" class="w-3 px-0">
                 <mat-icon>close</mat-icon>
@@ -34,8 +34,8 @@
         <mat-error *ngIf="getError('lastName')">{{getError('lastName')}}</mat-error>
         <mat-form-field class="w-100">
             <mat-label>Email address</mat-label>
-            <input type="email" matInput [readonly]="formDisabled" [formControl]="getCtrl('email')" placeholder=""
-                aria-describedby="emailHelp" autocomplete="off">
+            <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('email')" placeholder=""
+                aria-describedby="emailHelp" autocomplete="email">
             <button type="button" [class.invisible]="!isSet('email')" matSuffix mat-icon-button aria-label="Clear"
                 [disabled]="formDisabled" (click)="set('email', '')" class="w-3 px-0">
                 <mat-icon>close</mat-icon>
@@ -73,7 +73,7 @@
         <mat-form-field class="w-100">
             <mat-label>Collection</mat-label>
             <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('collection')" placeholder=""
-                aria-describedby="collectionHelp" autocomplete="off">
+                aria-describedby="collectionHelp" autocomplete="on">
             <button type="button" [class.invisible]="!isSet('collection')" matSuffix mat-icon-button aria-label="Clear"
                 [disabled]="formDisabled" (click)="set('collection', '')" class="w-3 px-0">
                 <mat-icon>close</mat-icon>
@@ -98,7 +98,8 @@
         <mat-checkbox formControlName="stayLoggedIn">
             Stay logged in
         </mat-checkbox>
-        <btn-component type="button" [disabled]="!signupForm.valid" class="w-100 mt-4">
+        <btn-component type="button" [disabled]="!signupForm.valid"
+            (click2)="signupForm.valid && signup()" class="w-100 mt-4">
             Sign up
         </btn-component>
         <!-- <mat-form-field class="w-100">

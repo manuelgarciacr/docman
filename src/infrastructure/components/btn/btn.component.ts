@@ -11,7 +11,7 @@ import { RouterModule } from '@angular/router';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BtnComponent implements AfterViewInit {
-    @Output() click = new EventEmitter<MouseEvent>();
+    @Output() click2 = new EventEmitter<MouseEvent>();
     @Input() type: string = "button";
     @Input() degree: string = "15";
     @Input() routerLink: string | null = null;
@@ -27,6 +27,6 @@ export class BtnComponent implements AfterViewInit {
     }
 
     onClickButton(event: MouseEvent) {
-        this.click.emit(event);
+        this.click2.emit(event);
     }
 }

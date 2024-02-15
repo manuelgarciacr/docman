@@ -1,6 +1,6 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-export function checkPasswordValidator(minLower = 1, minUpper = 1, minSpecial = 1, minDigit = 1): ValidatorFn {
+export function passwordValidator(minLower = 1, minUpper = 1, minSpecial = 1, minDigit = 1): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
         const len = control.value?.length | 0;
         const lower = control.value?.match(/[a-z]/g)?.length | 0;

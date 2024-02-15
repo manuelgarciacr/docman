@@ -6,19 +6,19 @@
         </button> -->
         <btn-component [style.display]="hasBackBtn() ? 'block' : 'none'"
             [routerLink]="'/login'"
-            (click)="signupComponent.setData()">
+            (click2)="signupComponent.setData()">
             Back
         </btn-component>
         <h1 class="navbar-app-name">DocManager</h1>
         <span class="example-spacer"></span>
-        <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="navbar-tabnav" [style.display]="isMobile() ? 'none' : 'block'"
+        <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="navbar-tabnav" [style.display]="isMobile() || accounting() ? 'none' : 'block'"
             [backgroundColor]="'primary'">
             @for (link of links; track link) {
                 <!-- <a mat-tab-link (click)="activeLink = link.path" [active]="activeLink == link.path" [routerLink]="link.path"
                     routerLinkActive="active" class="navbar-link text-capitalize">
                     {{link.path}}
                 </a> -->
-                <a mat-tab-link [active]="activeLink() == link.path" [routerLink]="link.path"
+                <a mat-tab-link [active]="activeLink().endsWith(link.path!)" [routerLink]="link.path"
                     routerLinkActive="active" class="navbar-link text-capitalize">
                     {{link.path}}
                 </a>

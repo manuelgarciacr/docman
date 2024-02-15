@@ -1,10 +1,12 @@
 // import { CommonModule } from '@angular/common';
 import { NgFor, NgIf } from "@angular/common";
 import {
+    AfterViewInit,
     ChangeDetectionStrategy,
     Component,
-    Inject,
+    ElementRef,
     OnInit,
+    ViewChild,
     inject,
 } from "@angular/core";
 import {
@@ -18,26 +20,19 @@ import {
 import { MatButtonModule } from "@angular/material/button";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import {
-    MAT_DIALOG_DATA,
     MatDialogModule,
-    MatDialog,
 } from "@angular/material/dialog";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
-import { MatSelectModule } from "@angular/material/select";
 import {
     ConfigurationService,
     ICollection,
-    IUser,
-    ROLES,
     UserService,
     CollectionService,
 } from "@domain";
-import { UsersRepoService } from "@infrastructure";
-import { checkPasswordValidator } from "@utils";
+import { passwordValidator, ltrimFormControl, trimFormControl, UniqueEmailValidator, UniqueCollectionValidator } from "@utils";
 import { BtnComponent } from "@infrastructure";
-import { Subscription } from "rxjs";
 //import * as bcrypt from "bcryptjs";
 
 @Component({
@@ -61,7 +56,8 @@ import { Subscription } from "rxjs";
         BtnComponent,
     ],
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
+    @ViewChild('firstItem') firstItem!: ElementRef;
     // private readonly repo = inject(UsersRepoService);
 
     // protected data: {
@@ -76,6 +72,10 @@ export class LoginComponent implements OnInit {
     private readonly collectionService = inject(CollectionService);
     //private readonly user: IUser | null = null;
     private readonly user = this.userService.getUser();
+    private readonly uniqueEmailValidator = inject(UniqueEmailValidator);
+    private readonly uniqueCollectionValidator = inject(
+        UniqueCollectionValidator
+    );
     private collection: ICollection | null = null;
     // private readonly userSubscription = this.userService.user$.subscribe(
     //     user => (this.user = user)
@@ -112,17 +112,36 @@ export class LoginComponent implements OnInit {
             // createdAt: new FormControl(""),
             // __v: new FormControl(""),
             email: new FormControl(this.user?.email ?? "", {
-                validators: [Validators.required, Validators.email],
+                validators: [
+                    trimFormControl,
+                    Validators.required,
+                    Validators.email,
+                ],
+                asyncValidators: [
+                    this.uniqueEmailValidator.validate.bind(
+                        this.uniqueEmailValidator
+                    ),
+                ],
             }),
             password: new FormControl(this.user?.password ?? "", {
                 validators: [
                     Validators.required,
                     Validators.minLength(8),
-                    checkPasswordValidator(),
+                    passwordValidator(),
                 ],
             }),
             collection: new FormControl(this.collection?.name ?? "", {
-                validators: [Validators.required, Validators.minLength(3)],
+                validators: [
+                    ltrimFormControl,
+                    Validators.required,
+                    Validators.minLength(3),
+                ],
+                asyncValidators: [
+                    this.uniqueCollectionValidator.validate.bind(
+                        this.uniqueCollectionValidator
+                    ),
+                ],
+                updateOn: "change"
             }),
             stayLoggedIn: new FormControl(
                 this.conf.getConfig().stayLoggedIn,
@@ -148,6 +167,14 @@ export class LoginComponent implements OnInit {
         // if (this.data.action == "Delete") {
         //     this.formDisabled = true;
         // }
+    }
+
+    ngAfterViewInit(): void {
+        // this.firstItem.focus();
+        // this.firstItem.focus()
+        setTimeout(() => {
+            this.firstItem.nativeElement.focus();
+        }, 0);
     }
 
     protected getError = (field: string) => {
@@ -182,6 +209,9 @@ export class LoginComponent implements OnInit {
                 subject +
                 " must have at least one lowercase letter, one uppercase letter, one digit, and one special character."
             );
+
+        if (errors["unique"]) return subject + " already exists.";
+
         return subject + " is not valid.";
     };
 
@@ -268,7 +298,8 @@ export class LoginComponent implements OnInit {
         // });
     };
 */
-    protected togglePwdState = () => this.pwdState.state = 1 - this.pwdState.state;
+    protected togglePwdState = () =>
+        (this.pwdState.state = 1 - this.pwdState.state);
 
     /*
 
@@ -284,13 +315,10 @@ export class LoginComponent implements OnInit {
     }; */
 
     protected setData = () => {
-        const stay = this.loginForm.get("stayLoggedIn")?.value ?? false;
-        let email = (this.loginForm.get("email")?.value as string)
-            .trim()
-            .toLowerCase();
-        let password = (this.loginForm.get("password")?.value as string);
-        let collection = (this.loginForm.get("collection")?.value as string)
-            .trim();
+        const stay = this.getValue("stayLoggedIn") ?? false;
+        let email = this.trimValue("email").toLowerCase();
+        let password = this.getValue("password") as string;
+        let collection = this.trimValue("collection");
 
         if (this.getError("email")) email = "";
         if (this.getError("password")) password = "";
@@ -300,21 +328,39 @@ export class LoginComponent implements OnInit {
             email: email,
             password: password,
             firstName: this.user?.firstName ?? "",
-            lastName: this.user?.lastName ?? ""
+            lastName: this.user?.lastName ?? "",
         });
         this.collectionService.setCollection({
             name: collection,
             description: this.collection?.description ?? "",
-            users: email == "" ? [] : [email],
-            roles: email == "" ? [] : ["owner"],
+            users: [],
+            roles: [],
             documents: [],
         });
         this.conf.setStayLoggedIn(stay);
     };
 
+    protected login = () => {
+        this.setData();
+        const user = this.userService.getUser();
+        const collection = this.collectionService.getCollection();
+
+        collection!.users = [];
+        collection!.roles = [];
+        collection!.documents = [];
+        this.loginForm.get("collection")?.updateValueAndValidity()
+        console.log({ user, collection });
+    };
+
+    private getValue = (name: string) => this.loginForm.get(name)?.value;
+    private trimValue = (name: string) => {
+        const v = (this.getValue(name) as string).trim();
+        this.set(name, v);
+        return v;
+    };
     protected getCtrl = (name: string) =>
         this.loginForm.get(name) as FormControl;
-    protected isSet = (name: string) => this.loginForm.get(name)?.value != "";
+    protected isSet = (name: string) => this.getValue(name) != "";
     protected set = (name: string, val: unknown) =>
         this.loginForm.get(name)?.setValue(val);
 }

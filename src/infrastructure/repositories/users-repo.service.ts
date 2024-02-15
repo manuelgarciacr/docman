@@ -15,8 +15,8 @@ export class UsersRepoService {
     //     return this._users;
     // }
 
-    getUsers = (arg?: string | Params) => this.dataSource.get(URL, arg);
-    putUser = (user: IUser) => this.dataSource.put(URL, user);
-    addUser = (user: IUser) => this.dataSource.post(URL, user);
-    deleteUser = (id: string) => this.dataSource.delete(URL, id);
+    getUsers = (arg?: string | Params, action?: string) => this.dataSource.get(URL, arg, action);
+    // putUser = (user: IUser) => this.dataSource.put(URL, user);
+    // addUser = (user: IUser, action?: string) => this.dataSource.post(URL, user, action);
+    // deleteUser = (id: string) => this.dataSource.delete(URL, id);
 }

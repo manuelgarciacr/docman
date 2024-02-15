@@ -35,12 +35,19 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
      *   things, encodes the parameters to be added to the URL as query string parameters
      *   (Endpoint of type '/endpoint/?key1=value1&key2=value2&...')
      *
-     * @param url string with the url of the endpoint
+     * @param url string with the URL of the endpoint
+     * @param action string with the name of an action to add to the URL
      * @param arg string or Params, a typescript dictionary with the params to be send
      * @returns The Observable of type resp<T> returned by the _get function
      */
-    get = (url: string, arg?: string | Params): Observable<resp<T>> => {
+    get = (
+        url: string,
+        arg?: string | Params,
+        action?: string
+    ): Observable<resp<T>> => {
         let params = new HttpParams(); // Query params
+
+        if (typeof action != "undefined") url += `/${action}`;
 
         if (typeof arg == "string") url += `/${arg}`;
         else if (typeof arg == "object") params = params.appendAll(arg);
@@ -76,7 +83,10 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
             );
     };
 
-    post = (url: string, data: T) => {
+    post = (url: string, data: T, action?: string) => {
+
+        if (typeof action != "undefined") url += `/${action}`;
+
         return this.http
             .post<resp<T>>(url, data, httpOptions)
             .pipe(

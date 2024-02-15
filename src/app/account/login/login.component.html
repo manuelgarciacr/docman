@@ -13,10 +13,10 @@
         class="was-validated rounded-4 py-4 px-4 mt-3 mx-auto">
         <mat-form-field class="w-100">
             <mat-label>Email address</mat-label>
-            <input type="email" matInput [readonly]="formDisabled"
+            <input type="text" matInput [readonly]="formDisabled"
                 [formControl]="getCtrl('email')" placeholder=""
-
-                aria-describedby="emailHelp" autocomplete="off">
+                aria-describedby="emailHelp" autocomplete="email"
+                #firstItem>
             <button type="button" [class.invisible]="!isSet('email')" matSuffix mat-icon-button
                 aria-label="Clear" [disabled]="formDisabled" (click)="set('email', '')" class="w-3 px-0">
                 <mat-icon>close</mat-icon>
@@ -54,7 +54,7 @@
         <mat-form-field class="w-100">
             <mat-label>Collection</mat-label>
             <input type="text" matInput [readonly]="formDisabled" [formControl]="getCtrl('collection')" placeholder=""
-                aria-describedby="collectionHelp" autocomplete="off">
+                aria-describedby="collectionHelp" autocomplete="on">
             <button type="button" [class.invisible]="!isSet('collection')" matSuffix mat-icon-button
                 aria-label="Clear" [disabled]="formDisabled" (click)="set('collection', '')" class="w-3 px-0">
                 <mat-icon>close</mat-icon>
@@ -71,11 +71,12 @@
             <btn-component type="button" class="cls-forgotpwd">
                 Forgot password
             </btn-component>
-            <btn-component type="button" (click)="setData()" [routerLink]="'/signup'" class="cls-signup m-1">
+            <btn-component type="button" (click2)="setData()" [routerLink]="'/signup'" class="cls-signup m-1">
                 Sign up
             </btn-component>
         </div>
-        <btn-component type="button"  [disabled]="!loginForm.valid" class="w-100 mt-2">
+        <btn-component type="button"  [disabled]="!loginForm.valid"
+            (click2)="loginForm.valid && login()" class="w-100 mt-2">
             Log in
         </btn-component>
         <!-- <mat-form-field class="w-100">
