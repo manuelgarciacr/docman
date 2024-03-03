@@ -1,14 +1,13 @@
-import { Injectable } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { IUser } from "@domain";
-import { BehaviorSubject, Observable } from "rxjs";
 
 @Injectable({
     providedIn: 'root',
 })
 export class UserService {
-    private _user = new BehaviorSubject<IUser | null>(null);
-    readonly user$: Observable<IUser | null> = this._user.asObservable();
+    private _user = signal<IUser | null>(null);
 
-    setUser = (user: IUser) => this._user.next(user);
-    getUser = () => this._user.getValue();
+    readonly user = this._user.asReadonly();
+
+    setUser = (user: IUser | null) => this._user.set(user);
 }

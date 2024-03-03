@@ -4,7 +4,8 @@
 
 export const environment = {
     production: false,
-    apiUrl: "http://localhost:3400",
+    apiUrl: "https://localhost:3400/V1",
+    expiration: 2 // Sign up validation time in minutes
 };
 
 /*

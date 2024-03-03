@@ -86,6 +86,9 @@ $docman-theme: mat.define-dark-theme(
 // @use "../src/styles/components";
 @use "../src/styles/typography/config" as typography;
 
+@use "SASS:map";
+@use '@ngneat/hot-toast/src/styles/styles.scss';
+
 @include mat.core();
 
 @include mat.core-theme(light.$light-theme);
@@ -102,6 +105,7 @@ $docman-theme: mat.define-dark-theme(
 @include btn.theme(light.$light-theme);
 
 @include mat.typography-hierarchy(typography.$docman-typography);
+
 
 :root {
     --system-preference: undefined
@@ -137,3 +141,38 @@ body {
     font-family: Roboto, "Helvetica Neue", sans-serif;
     user-select: none;
 }
+
+// Toast
+
+$color-config: mat.get-color-config(light.$light-theme);
+$primary-palette: map.get($color-config, "primary");
+
+.hot-toast-bar-base {
+    --hot-toast-color: #{mat.get-color-from-palette($primary-palette, A400-contrast)};
+    --background-color: #{mat.get-color-from-palette($primary-palette, A400)};
+    --background-light-color: #{mat.get-color-from-palette($primary-palette, A100)};
+
+    background: linear-gradient(
+        90deg,
+        var(--background-color) 68%,
+        var(--background-light-color) 100%
+    )!important;
+
+    font-weight: bold;
+
+    .hot-toast-close-btn {
+        --hot-toast-close-btn-opacity: 1
+    }
+}
+
+.dark-theme .hot-toast-bar-base {
+    @extend .hot-toast-bar-base;
+    --hot-toast-color: #{mat.get-color-from-palette($primary-palette, 400-contrast)};
+    --background-color: #{mat.get-color-from-palette($primary-palette, 400)};
+    --background-light-color: #{mat.get-color-from-palette($primary-palette, 200)};
+
+    .hot-toast-close-btn {
+        --hot-toast-close-btn-background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e");
+    }
+}
+

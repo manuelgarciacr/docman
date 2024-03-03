@@ -1,0 +1,28 @@
+<div>
+    <form [formGroup]="validationForm" color="primary" onsubmit="return false"
+        class="was-validated rounded-4 py-4 px-4 mt-3 text-center mx-auto">
+        <countdown #cd [config]="config" (event)="handleEvent($event)"
+            class="mx-auto mat-headline-3"/>
+        <p class="py-3">Hello. Do not close this window. You have {{ validationTime}} minutes to report
+            the code value included in the email you should have received after registration.
+            Best regards.</p>
+        <mat-form-field class="mat-headline-4 mx-auto my-3" >
+            <mat-label>Validation Code</mat-label>
+            <input type="text" matInput [formControl]="getCtrl('code')" placeholder="00000" aria-describedby="codeHelp"
+                autocomplete="off" numbersOnly #firstItem>
+            <button type="button" [class.invisible]="!isSet('code')" matSuffix mat-icon-button aria-label="Clear"
+                (click)="set('code', '')" class="w-3 px-0">
+                <mat-icon>close</mat-icon>
+            </button>
+            <div id="codenHelp" class="form-text d-none">
+                Five digit code. Ten minutes to complete it.
+            </div>
+        </mat-form-field>
+        <mat-error style="height: auto" color="warn" *ngIf="getError('code')">{{getError('code')}}</mat-error>
+        <btn-component type="button"  (click2)="validation()"
+            [routerLink]="btnLink()" class="w-100 my-2">
+            {{btnLabel()}}
+        </btn-component>
+    </form>
+</div>
+

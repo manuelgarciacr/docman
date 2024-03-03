@@ -1,25 +1,60 @@
-import { Injectable, inject } from "@angular/core";
+import { ChangeDetectorRef, Injectable, inject } from "@angular/core";
 import { AbstractControl, AsyncValidator, ValidationErrors } from "@angular/forms";
 import { IUser } from "@domain";
 import { UsersRepoService, resp } from "@infrastructure";
-import { Observable, catchError, map, of } from "rxjs";
+import { HotToastService } from "@ngneat/hot-toast";
+import { Observable, catchError, finalize, map, of } from "rxjs";
 
 @Injectable({ providedIn: "root" })
 export class UniqueEmailValidator implements AsyncValidator {
     private readonly usersRepoService = inject(UsersRepoService);
-    // private onChange: () => void = () => null;
+    private readonly toast = inject(HotToastService);
+
+    private canceled = false;
+    private validating = false;
+
+    constructor(private changeDetectorRef: ChangeDetectorRef) {}
 
     validate(control: AbstractControl): Observable<ValidationErrors | null> {
+
+        if (this.canceled) return of(null);
+
+        this.validating = true;
+
+        setTimeout(() => {
+
+            if ( !this.validating ) return;
+
+            this.toast.loading(`Validating email`, {
+                autoClose: false,
+                dismissible: true,
+                id: "emailToast",
+            });
+        }, 500)
+
         return this.usersRepoService
             .getUsers({ email: control.value }, "email-exists")
             .pipe(
-                map((res: resp<IUser>) =>
-                    res.message ? { unique: true } : null
-                ),
-                catchError(() => of(null)),
-        );
+                map((res: resp<IUser>) => {
+                    this.validating = false;
+                    this.toast.close("emailToast");
+
+                    if (typeof res.message != "boolean")
+                        return { connection: true };
+
+                    return res.message ? { unique: true } : null;
+                }),
+                catchError(() => {
+                    this.validating = false;
+                    this.toast.close("emailToast");
+                    return of(null)
+                }),
+                finalize(() => this.changeDetectorRef.markForCheck())
+            );
     }
-    // registerOnValidatorChange?(fn: () => void): void {
-    //     this.onChange = fn;
-    // }
+
+    cancel = () => {
+        this.toast.close("emailToast");
+        this.canceled = true;
+    };
 }

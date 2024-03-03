@@ -26,6 +26,11 @@ export const routes: Routes = [
         data: { accounting: true },
     },
     {
+        path: "validation",
+        loadComponent: () => import("@app").then(c => c.ValidationComponent),
+        data: { accounting: true },
+    },
+    {
         path: "test",
         loadComponent: () => import("@app").then(c => c.TestComponent),
         data: { trn: "Test" },

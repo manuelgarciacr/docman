@@ -1,6 +1,9 @@
 :host {
     display: block;
     position: relative;
+    min-height: 300px;
+    height: 100%;
+    overflow-y: auto;
     form {
         max-width: 26rem;
         .btn-clear, .btn-pwd {

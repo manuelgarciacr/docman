@@ -1,0 +1,69 @@
+:host {
+    display: block;
+    position: relative;
+    // mat-error {
+    //     color: rgb(238, 69, 69);
+    // }
+    form {
+        max-width: 26rem;
+        .btn-clear, .btn-pwd {
+            width: 2.5rem;
+        }
+        .cls-forgotpwd {
+            width: 60%
+        }
+        .cls-signup {
+            width: 40%
+        }
+        mat-form-field {
+            width: 12rem;
+            font-family: "Chivo Mono", monospace;
+        }
+        .count-down {
+            font-family: "Chivo Mono", monospace;
+        }
+    }
+    mat-error {
+        font-weight: bold;
+        margin-top: -30px;
+        margin-bottom: 9px; //Margin bottom - top must be 21px
+    }
+//     mat-form-field {
+//         --mdc-filled-text-field-container-color: green;
+// --mdc-filled-text-field-label-text-color: white;
+// --mdc-filled-text-field-focus-label-text-color: white;
+//     --mdc-filled-text-field-active-indicator-color: white;
+//     --mdc-filled-text-field-focus-active-indicator-color: white;
+//     --mdc-filled-text-field-hover-active-indicator-color: white;
+//     --mdc-filled-text-field-input-text-color: white;
+//     }
+}
+
+p.cls-system-preference::after {
+    content: var(--system-preference)
+}
+
+.user-component {
+    &.displayNone {
+        display: none
+    }
+    &.action-btn>span::first-letter {
+        text-transform: capitalize;
+    }
+
+}
+
+// .doc-login-font-size {
+//     line-height: 3.2rem;
+// }
+
+// .mat-form-field {
+//     input {
+//         padding-top: 1.2rem;
+//     }
+//   font-size: 1.5rem;
+//   height: 5rem;
+//   .mat-mdc-form-field-flex {
+//     margin-top: 1.2rem;
+//   }
+// }

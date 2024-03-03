@@ -1,14 +1,13 @@
-import { Injectable } from "@angular/core";
+import { Injectable, signal } from "@angular/core";
 import { ICollection } from "@domain";
-import { BehaviorSubject, Observable } from "rxjs";
 
 @Injectable({
     providedIn: 'root',
 })
 export class CollectionService {
-    private _collection = new BehaviorSubject<ICollection | null>(null);
-    readonly collection$: Observable<ICollection | null> = this._collection.asObservable();
+    private _collection = signal<ICollection | null>(null)
 
-    setCollection = (collection: ICollection) => this._collection.next(collection);
-    getCollection = () => this._collection.getValue();
+    readonly collection = this._collection.asReadonly();
+
+    setCollection = (collection: ICollection | null) => this._collection.set(collection);
 }

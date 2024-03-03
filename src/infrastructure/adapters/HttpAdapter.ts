@@ -1,4 +1,4 @@
-import { Observable, catchError, of, retry, timer } from "rxjs";
+import { Observable, TimeoutError, auditTime, catchError, of, retry, timeout, timer } from "rxjs";
 import { IHttpAdapter, Params, resp } from "./IHttpAdapter";
 import {
     HttpClient,
@@ -70,6 +70,8 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
         this.http
             .get<resp<T>>(url, { ...httpOptions, params })
             .pipe(
+                //auditTime(11000),
+                timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
                 catchError(this.handleError<T>("http get"))
             );
@@ -78,18 +80,19 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
         return this.http
             .put<resp<T>>(url, data, httpOptions)
             .pipe(
+                timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
                 catchError(this.handleError<T>("http put"))
             );
     };
 
     post = (url: string, data: T, action?: string) => {
-
         if (typeof action != "undefined") url += `/${action}`;
 
         return this.http
             .post<resp<T>>(url, data, httpOptions)
             .pipe(
+                timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
                 catchError(this.handleError<T>("http post"))
             );
@@ -99,6 +102,7 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
         return this.http
             .delete<resp<T>>(`${url}/${id}`, httpOptions)
             .pipe(
+                timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
                 catchError(this.handleError<T>("http delete"))
             );
@@ -115,15 +119,21 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
      * @returns Function of type (HttpErrorResponse) => Observable<resp<T>>
      */
     private handleError<T>(operation: string) {
-        return (error: HttpErrorResponse): Observable<resp<T>> => {
-            const status = error.status;
-            const message =
-                error instanceof HttpErrorResponse
-                    ? error.message
-                    : (error as Error).message;
-            const data = [] as Array<T>; // error.error;
+        return (error: unknown): Observable<resp<T>> => {
+            let status = 600;
+            let message = (error as Error).message ?? "ERROR 600";
+            let data = [];
 
-            console.log(`${operation} failed: ${message}`, error);
+            if (error instanceof HttpErrorResponse) {
+                status = error.status == 200 ? 1 : error.status;
+                message = error.message + ": " + error.error?.message;
+                data = error.error?.data ?? [];
+            } else if (error instanceof TimeoutError) {
+                status = 601;
+                message = error.message + " (601)";
+            }
+
+            console.error(`${operation} failed: ${message}`, error);
 
             // Let the app keep running by returning a safe result.
             return of({ status, message, data });
@@ -131,9 +141,9 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
     }
 
     // A custom method to check should retry a request or not
-    // Retry when the status code is not 404
+    // Retry when the status code is not 404 nor timeout
     private shouldRetry(error: HttpErrorResponse) {
-        if (error.status != 404) {
+        if (error.status != 404 && !(error instanceof TimeoutError)) {
             return timer(1000); // Adding a timer from RxJS to return observable<0> to delay param.
         }
 

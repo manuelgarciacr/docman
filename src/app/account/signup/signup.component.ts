@@ -1,16 +1,23 @@
 import { MediaMatcher } from '@angular/cdk/layout';
 import { NgIf } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
-import { CollectionService, ConfigurationService, ICollection, UserService } from '@domain';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { CollectionService, ConfigurationService, UserService } from '@domain';
 import { AccountRepoService, BtnComponent } from '@infrastructure';
+import { HotToastService } from '@ngneat/hot-toast';
 import { UniqueCollectionValidator, UniqueEmailValidator, passwordValidator, ltrimFormControl, trimFormControl } from '@utils';
+import { Subscription, tap } from 'rxjs';
+
+const DISMISS = {
+    autoClose: false,
+    dismissible: true,
+};
 
 @Component({
     selector: "app-signup",
@@ -40,21 +47,20 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly formBuilder = inject(FormBuilder);
     private readonly userService = inject(UserService);
     private readonly collectionService = inject(CollectionService);
-    private readonly uniqueEmailValidator = inject(UniqueEmailValidator);
-    private readonly uniqueCollectionValidator = inject(
-        UniqueCollectionValidator
+    private readonly toast = inject(HotToastService);
+    private readonly changeDetectionRef = inject(ChangeDetectorRef);
+    //private readonly uniqueEmailValidator = inject(UniqueEmailValidator());
+    private readonly uniqueEmailValidator = new UniqueEmailValidator(
+        this.changeDetectionRef
+    );
+    private readonly uniqueCollectionValidator = new UniqueCollectionValidator(
+        this.changeDetectionRef
     );
     //private readonly user: IUser | null = null;
-    private loading = signal(false);
-    private readonly user = this.userService.getUser();
-    private collection: ICollection | null = null;
-    // private readonly userSubscription = this.userService.user$.subscribe(
-    //     user => (this.user = user)
-    // );
-    private collectionSubscription =
-        this.collectionService.collection$.subscribe(
-            collection => (this.collection = collection)
-        );
+    private readonly user = this.userService.user();
+    private readonly collection = this.collectionService.collection();
+
+    private navigationSubscription?: Subscription;
     private media = inject(MediaMatcher);
     private matcher = this.media.matchMedia("(max-width: 600px)");
     protected isMobile = signal(this.matcher.matches);
@@ -91,7 +97,7 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.uniqueEmailValidator
                     ),
                 ],
-                //updateOn: "submit",
+                updateOn: "blur",
             }),
             password: new FormControl(this.user?.password ?? "", {
                 validators: [
@@ -111,7 +117,7 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
                         this.uniqueCollectionValidator
                     ),
                 ],
-                //updateOn: "submit",
+                updateOn: "blur",
             }),
             description: new FormControl(this.collection?.description ?? "", {
                 validators: [ltrimFormControl],
@@ -123,6 +129,17 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
         };
         this.signupForm = this.formBuilder.group(formGroup);
         this.matcher.addEventListener("change", this.matcherListener);
+
+        if (this.getValue("email") != "") this.getCtrl("email").markAsTouched();
+        if (this.getValue("collection") != "")
+            this.getCtrl("collection").markAsTouched();
+        this.navigationSubscription = this.router.events.subscribe(e => {
+            if (e instanceof NavigationStart) {
+                this.uniqueEmailValidator.cancel();
+                this.uniqueCollectionValidator.cancel();
+                this.navigationSubscription?.unsubscribe();
+            }
+        });
     }
 
     ngAfterViewInit(): void {
@@ -138,7 +155,7 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
     protected getError = (field: string) => {
         const control = this.signupForm.get(field);
         const errors = control?.errors ?? {};
-        // console.log(field, control);
+
         if (Object.keys(errors).length === 0) return null;
         if (!control!.touched) return null;
         const subject =
@@ -167,6 +184,9 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (errors["unique"]) return subject + " already exists.";
 
+        if (errors["connection"])
+            return subject + " cannot be validated due to connection error.";
+
         return subject + " is not valid.";
     };
 
@@ -191,6 +211,7 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
             password: password,
             firstName: firstName,
             lastName: lastName,
+            enabled: false,
         });
         this.collectionService.setCollection({
             name: collection,
@@ -204,24 +225,47 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
 
     protected signup = () => {
         this.setData();
-        const user = this.userService.getUser()!;
-        const collection = this.collectionService.getCollection()!;
+        const user = this.userService.user()!;
+        const collection = this.collectionService.collection()!;
+        const stayLoggedIn = this.conf.getConfig().stayLoggedIn;
+        const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
 
         collection!.users = [];
         collection!.roles = [];
         collection!.documents = [];
 
-        this.loading.set(true);
-        this.repo.signup({ user, collection}).subscribe({
-            //this.starships.push(...(resp.body ? resp.body.results : []));
-            //this.nextPage = resp.body?.next || null;
-            next: resp => {
-                console.log(resp);
-                this.router.navigateByUrl("test")//, { replaceUrl: true });
-            },
-            error: err => console.error("SIGNUP ERROR", err),
-            complete: () => this.loading.set(false)
-        });
+        this.repo
+            .ownerSignup({ user, collection, stayLoggedIn })
+            .pipe(
+                this.toast.observe({
+                    loading: { content: "Registering" },
+                    success: {
+                        content: "Success",
+                        style: { display: "none" },
+                    },
+                    error: {
+                        content: err => `Error: ${err.toString()}`,
+                    },
+                }),
+                tap(resp => {
+                    const err = briefError(resp.message.toString());
+                    if (resp.status == 200) {
+                        this.toast.success(
+                            "Successful registration. Pending validation."
+                        );
+                    } else {
+                        this.toast.error(err, DISMISS);
+                    }
+                })
+            )
+            .subscribe({
+                next: resp => {
+                    console.log(resp);
+                    if (resp.status == 200)
+                        this.router.navigateByUrl("validation"); //, { replaceUrl: true });
+                },
+                error: err => console.error("SIGNUP ERROR", err),
+            });
     };
 
     private getValue = (name: string) => this.signupForm.get(name)?.value;

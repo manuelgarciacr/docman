@@ -1,6 +1,7 @@
 import { Observable } from "rxjs";
 
 export type resp<T> = {
+    status: number,
     message: string | boolean,
     data: T[]
 }
