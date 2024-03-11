@@ -9,7 +9,7 @@ const URL = `${environment.apiUrl}/collections`;
     providedIn: "root",
 })
 export class CollectionsRepoService {
-    private dataSource: IHttpAdapter<ICollection> = inject(HttpAdapter<ICollection>);
+    private dataSource: IHttpAdapter<ICollection, ICollection[]> = inject(HttpAdapter<ICollection, ICollection[]>);
 
     getCollections = (arg?: string | Params, action?: string) =>
         this.dataSource.get(URL, arg, action);

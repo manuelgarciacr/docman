@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Injectable, inject } from "@angular/core";
 import { AbstractControl, AsyncValidator, ValidationErrors } from "@angular/forms";
 import { ICollection } from "@domain";
-import { CollectionsRepoService, resp } from "@infrastructure";
+import { CollectionsRepoService, Resp, resp } from "@infrastructure";
 import { HotToastService } from "@ngneat/hot-toast";
 import { Observable, catchError, finalize, map, of} from "rxjs";
 
@@ -33,9 +33,9 @@ export class UniqueCollectionValidator implements AsyncValidator {
         }, 500);
 
         return this.collectionsRepoService
-            .getCollections({ collection: control.value }, "collection-exists")
+            .getCollections({ name: control.value }, "collection-exists")
             .pipe(
-                map((res: resp<ICollection>) => {
+                map((res: Resp<ICollection[]>) => {
                     this.validating = false;
                     this.toast.close("collectionToast");
 

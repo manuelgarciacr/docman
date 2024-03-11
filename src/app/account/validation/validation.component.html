@@ -3,7 +3,7 @@
         class="was-validated rounded-4 py-4 px-4 mt-3 text-center mx-auto">
         <countdown #cd [config]="config" (event)="handleEvent($event)"
             class="mx-auto mat-headline-3"/>
-        <p class="py-3">Hello. Do not close this window. You have {{ validationTime}} minutes to report
+        <p class="py-3">Hello. Do not close this window. You have {{ (validationExpiration / 60) | number: '1.0-0' }} minutes to report
             the code value included in the email you should have received after registration.
             Best regards.</p>
         <mat-form-field class="mat-headline-4 mx-auto my-3" >

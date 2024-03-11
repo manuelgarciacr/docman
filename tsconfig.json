@@ -45,6 +45,9 @@
             "./node_modules/@types",
             "node_modules/@angular/material"
         ],
+        "types": [
+            "node"
+        ]
     },
     "angularCompilerOptions": {
         "enableI18nLegacyMessageIdFormat": false,

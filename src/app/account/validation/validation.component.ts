@@ -1,21 +1,28 @@
-import { NgIf } from '@angular/common';
+import { NgIf, DecimalPipe } from '@angular/common';
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, OnInit, ViewChild,inject, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { BtnComponent } from '@infrastructure';
-import { NumbersOnlyDirective, codeFormControl } from '@utils';
+import { AccountRepoService, BtnComponent } from '@infrastructure';
+import { NumbersOnlyDirective, codeFormControl, getTokenPayload } from '@utils';
 import { CountdownComponent, CountdownEvent, CountdownModule } from 'ngx-countdown';
 import { HotToastService } from "@ngneat/hot-toast";
-import { environment } from '@environments';
+import { tap } from 'rxjs';
+import { UserService } from '@domain';
+
+const DISMISS = {
+    autoClose: false,
+    dismissible: true,
+};
 
 @Component({
     selector: "app-validation",
     standalone: true,
     imports: [
         NgIf,
+        DecimalPipe,
         CountdownModule,
         FormsModule,
         ReactiveFormsModule,
@@ -36,12 +43,13 @@ export class ValidationComponent implements OnInit, AfterViewInit {
 
     private readonly formBuilder = inject(FormBuilder);
     private readonly toast = inject(HotToastService);
-    //private readonly repo = inject(AccountRepoService);
+    private readonly repo = inject(AccountRepoService);
+    private readonly userService = inject(UserService);
 
     protected readonly validationForm = this.formBuilder.group({});
-    protected readonly validationTime = environment.expiration; // In minutes
+    protected readonly validationExpiration = this.userService.validationExpiration(); // In seconds
     protected readonly config = {
-        leftTime: 60 * this.validationTime, //60 * 1/3,
+        leftTime: this.validationExpiration,
         format: "mm:ss",
     };
 
@@ -115,8 +123,47 @@ export class ValidationComponent implements OnInit, AfterViewInit {
     };
 
     protected validation = () => {
+        const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
+
         if (this.btnLink()) return;
-        console.log("VALIDATE");
+
+        this.userService.setValidationCode(this.getValue("code"));
+
+        this.repo
+            .ownerValidation()
+            .pipe(
+                this.toast.observe({
+                    loading: { content: "Validating" },
+                    success: {
+                        content: "Success",
+                        style: { display: "none" },
+                    },
+                    error: {
+                        content: err => `Error: ${err.toString()}`,
+                    },
+                }),
+                tap(resp => {
+                    const err = briefError(resp.message.toString());
+                    if (resp.status == 200) {
+                        this.toast.success(
+                            "Successful validation."
+                        );
+                        console.log(
+                            getTokenPayload(this.userService.refreshToken()),
+                            getTokenPayload(this.userService.accessToken())
+                        );
+                    } else {
+                        this.toast.error(err, DISMISS);
+                    }
+                })
+            )
+            .subscribe({
+                next: resp => {
+                    console.log(resp);
+                    //if (resp.status == 200) this.router.navigateByUrl("validation"); //, { replaceUrl: true });
+                },
+                error: err => console.error("VALIDATION ERROR", err),
+            });
     };
 
     // Form Control helpers

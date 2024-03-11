@@ -7,7 +7,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { NavigationEnd, NavigationStart, Router } from '@angular/router';
+import { NavigationStart, Router } from '@angular/router';
 import { CollectionService, ConfigurationService, UserService } from '@domain';
 import { AccountRepoService, BtnComponent } from '@infrastructure';
 import { HotToastService } from '@ngneat/hot-toast';

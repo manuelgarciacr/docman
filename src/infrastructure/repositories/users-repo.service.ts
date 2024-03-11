@@ -9,12 +9,18 @@ const URL = `${environment.apiUrl}/users`;
     providedIn: "root",
 })
 export class UsersRepoService {
-    private dataSource: IHttpAdapter<IUser> = inject(HttpAdapter<IUser>);
+    private dataSource: IHttpAdapter<IUser, IUser[]> = inject(
+        HttpAdapter<IUser, IUser[]>
+    );
     // private _users: IUser[] = [];
     // get users(): IUser[] {
     //     return this._users;
     // }
 
+    getUser = (id: string) =>
+        this.dataSource.get(URL, id);
+    // getUserByEmail = (email: string) =>
+    //     this.dataSource.get(URL, {"email": email});
     getUsers = (arg?: string | Params, action?: string) => this.dataSource.get(URL, arg, action);
     // putUser = (user: IUser) => this.dataSource.put(URL, user);
     // addUser = (user: IUser, action?: string) => this.dataSource.post(URL, user, action);

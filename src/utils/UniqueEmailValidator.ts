@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Injectable, inject } from "@angular/core";
 import { AbstractControl, AsyncValidator, ValidationErrors } from "@angular/forms";
 import { IUser } from "@domain";
-import { UsersRepoService, resp } from "@infrastructure";
+import { Resp, UsersRepoService, resp } from "@infrastructure";
 import { HotToastService } from "@ngneat/hot-toast";
 import { Observable, catchError, finalize, map, of } from "rxjs";
 
@@ -35,7 +35,7 @@ export class UniqueEmailValidator implements AsyncValidator {
         return this.usersRepoService
             .getUsers({ email: control.value }, "email-exists")
             .pipe(
-                map((res: resp<IUser>) => {
+                map((res: Resp<IUser[]>) => {
                     this.validating = false;
                     this.toast.close("emailToast");
 

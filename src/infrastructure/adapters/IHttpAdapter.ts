@@ -1,20 +1,34 @@
 import { Observable } from "rxjs";
 
-export type resp<T> = {
+export type resp<V> = {
     status: number,
     message: string | boolean,
-    data: T[]
+    data: V[]
+}
+
+export type Resp<V> = {
+    status: number,
+    message: string | boolean,
+    data?: V
 }
 
 export type Params = {
     [param: string]: string | number | boolean | readonly (string | number | boolean)[];
 };
 
-export interface IHttpAdapter<T> {
-
-    get: (url: string, arg?: string | Params, action?: string) => Observable<resp<T>>; // Get all
-    put: (url: string, data: T) => Observable<resp<T>>;
-    post: (url: string, data: T, action?: string) => Observable<resp<T>>;
-    delete: (url: string, id: string) => Observable<resp<T>>;
+export interface IHttpAdapter<T, V> {
+    get: (
+        url: string,
+        arg?: string | Params,
+        action?: string
+    ) => Observable<Resp<V>>; // Get all
+    post: (data: {
+        url: string;
+        body?: T;
+        arg?: string | Params;
+        action?: string;
+    }) => Observable<Resp<V>>;
+    put: (url: string, data: T) => Observable<Resp<V>>;
+    delete: (url: string, id: string) => Observable<Resp<V>>;
 }
 

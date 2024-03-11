@@ -8,7 +8,7 @@ export class NumbersOnlyDirective {
     //@Input() numbersOnly: boolean = true;
     //private _el = inject(ElementRef);
 
-    navigationKeys: Array<string> = ["Backspace", "ArrowLeft", "ArrowRight"]; //Add keys as per requirement
+    navigationKeys: Array<string> = ["Backspace", "ArrowLeft", "ArrowRight", "Tab"]; //Add keys as per requirement
 
     //constructor(private el: ElementRef) {}
 

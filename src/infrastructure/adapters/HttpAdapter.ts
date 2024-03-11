@@ -1,5 +1,5 @@
-import { Observable, TimeoutError, auditTime, catchError, of, retry, timeout, timer } from "rxjs";
-import { IHttpAdapter, Params, resp } from "./IHttpAdapter";
+import { Observable, TimeoutError, catchError, of, retry, timeout, timer } from "rxjs";
+import { IHttpAdapter, Params, Resp } from "./IHttpAdapter";
 import {
     HttpClient,
     HttpErrorResponse,
@@ -17,13 +17,13 @@ const httpOptions = {
     params: {},
     reportProgress: false,
     responseType: "json" as const,
-    withCredentials: false,
+    withCredentials: true,
 };
 
 @Injectable({
     providedIn: "root",
 })
-export class HttpAdapter<T> implements IHttpAdapter<T> {
+export class HttpAdapter<T, V> implements IHttpAdapter<T, V> {
     private http = inject(HttpClient); // HTTP service
 
     /**
@@ -44,7 +44,7 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
         url: string,
         arg?: string | Params,
         action?: string
-    ): Observable<resp<T>> => {
+    ): Observable<Resp<V>> => {
         let params = new HttpParams(); // Query params
 
         if (typeof action != "undefined") url += `/${action}`;
@@ -67,44 +67,71 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
      *   or an error description
      */
     private _get = (url: string, params: HttpParams) =>
+        this.http.get<Resp<V>>(url, { ...httpOptions, params }).pipe(
+            //auditTime(11000),
+            timeout(10000),
+            retry({ count: 2, delay: this.shouldRetry }),
+            catchError(this.handleError<V>("http get"))
+        );
+
+    post = (data: {
+        url: string;
+        body?: T;
+        arg?: string | Params;
+        action?: string;
+    }): Observable<Resp<V>> => {
+        const { body, arg, action } = data;
+        let url = data.url;
+        let params = new HttpParams(); // Query params
+
+        if (typeof action != "undefined") url += `/${action}`;
+
+        if (typeof arg == "string") url += `/${arg}`;
+        else if (typeof arg == "object") params = params.appendAll(arg);
+        else if (typeof arg != "undefined")
+            throw new Error("Get param is invalid");
+console.log("HTTPOPTIONS:", { ...httpOptions, params });
+        return this._post(url, body, params);
+    };
+
+    private _post = (url: string, body?: T, params?: HttpParams) =>
         this.http
-            .get<resp<T>>(url, { ...httpOptions, params })
+            .post<Resp<V>>(url, body, { ...httpOptions, params })
             .pipe(
-                //auditTime(11000),
                 timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
-                catchError(this.handleError<T>("http get"))
+                catchError(this.handleError<V>("http post"))
             );
+
+    // post = (url: string, data: T, action?: string) => {
+    //     if (typeof action != "undefined") url += `/${action}`;
+
+    //     return this.http
+    //         .post<resp<V>>(url, data, httpOptions)
+    //         .pipe(
+    //             timeout(10000),
+    //             retry({ count: 2, delay: this.shouldRetry }),
+    //             catchError(this.handleError<V>("http post"))
+    //         );
+    // };
 
     put = (url: string, data: T) => {
         return this.http
-            .put<resp<T>>(url, data, httpOptions)
+            .put<Resp<V>>(url, data, httpOptions)
             .pipe(
                 timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
-                catchError(this.handleError<T>("http put"))
-            );
-    };
-
-    post = (url: string, data: T, action?: string) => {
-        if (typeof action != "undefined") url += `/${action}`;
-
-        return this.http
-            .post<resp<T>>(url, data, httpOptions)
-            .pipe(
-                timeout(10000),
-                retry({ count: 2, delay: this.shouldRetry }),
-                catchError(this.handleError<T>("http post"))
+                catchError(this.handleError<V>("http put"))
             );
     };
 
     delete = (url: string, id: string) => {
         return this.http
-            .delete<resp<T>>(`${url}/${id}`, httpOptions)
+            .delete<Resp<V>>(`${url}/${id}`, httpOptions)
             .pipe(
                 timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
-                catchError(this.handleError<T>("http delete"))
+                catchError(this.handleError<V>("http delete"))
             );
     };
 
@@ -118,16 +145,16 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
      *   returned the error
      * @returns Function of type (HttpErrorResponse) => Observable<resp<T>>
      */
-    private handleError<T>(operation: string) {
-        return (error: unknown): Observable<resp<T>> => {
+    private handleError<V>(operation: string) {
+        return (error: unknown): Observable<Resp<V>> => {
             let status = 600;
             let message = (error as Error).message ?? "ERROR 600";
-            let data = [];
-
+            let data;
+console.log("EEERRR", error)
             if (error instanceof HttpErrorResponse) {
                 status = error.status == 200 ? 1 : error.status;
                 message = error.message + ": " + error.error?.message;
-                data = error.error?.data ?? [];
+                data = error.error?.data;
             } else if (error instanceof TimeoutError) {
                 status = 601;
                 message = error.message + " (601)";
@@ -141,9 +168,11 @@ export class HttpAdapter<T> implements IHttpAdapter<T> {
     }
 
     // A custom method to check should retry a request or not
-    // Retry when the status code is not 404 nor timeout
+    // Retry when the status code is not 404, 601 nor timeout
     private shouldRetry(error: HttpErrorResponse) {
-        if (error.status != 404 && !(error instanceof TimeoutError)) {
+        if (error.status != 404
+            && !(error instanceof TimeoutError)
+            && error.status != 601) {
             return timer(1000); // Adding a timer from RxJS to return observable<0> to delay param.
         }
 
