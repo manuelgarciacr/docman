@@ -16,6 +16,7 @@ export class BtnComponent implements AfterViewInit {
     @Input() degree: string = "15";
     @Input() routerLink: string | null = null;
     @Input() disabled: boolean = false;
+
     protected skew = () => `skew(-${this.degree}deg)`;
     private element = inject(ElementRef);
 

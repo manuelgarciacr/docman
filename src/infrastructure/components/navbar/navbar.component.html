@@ -24,7 +24,10 @@
                 </a>
             }
         </nav>
+
         <toggle-theme (collapseNavbar)="isMenuCollapsed = true" class="ms-auto"></toggle-theme>
+        <user-menu *ngIf="isAuthenticated()" class="ms-2"></user-menu>
+
         <!-- <div class="position-relative">
             <login-control class="position-absolute"></login-control>
         </div> -->
@@ -61,44 +64,3 @@
         </mat-drawer-content>
     </mat-drawer-container>
 </div>
-<!-- <nav class="navbar fixed-top navbar-expand-sm">
-    <div class="container-fluid">
-        <button
-            class="navbar-toggler"
-            (click)="isMenuCollapsed = !isMenuCollapsed"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarTogglerDemo03"
-            aria-controls="navbarTogglerDemo03"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-        >
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <a class="navbar-brand" href="#">Navbar</a>
-        <div
-            class="collapse navbar-collapse"
-            [ngbCollapse]="isMenuCollapsed"
-            id="navbarTogglerDemo03"
-        >
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item" *ngFor="let path of paths">
-                    <a
-                        class="nav-link"
-                        (click)="isMenuCollapsed = true"
-                        aria-current="page"
-                        [routerLink]="path.path"
-                        routerLinkActive="active"
-                        translate
-                        >ROUTES.{{path.data?.["trn"]}}</a
-                    >
-                </li>
-            </ul>
-
-            <login-control></login-control>
-            <toggle-lang (collapseNavbar)="isMenuCollapsed = true"></toggle-lang>
-            <toggle-theme (collapseNavbar)="isMenuCollapsed = true"></toggle-theme>
-
-        </div>
-    </div>
-</nav> -->

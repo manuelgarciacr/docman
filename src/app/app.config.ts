@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideHotToastConfig } from "@ngneat/hot-toast";
-import { ownerSignupInterceptor } from 'infrastructure/interceptors';
+import { logoutInterceptor, ownerSignupInterceptor } from 'infrastructure/interceptors';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -13,7 +13,8 @@ export const appConfig: ApplicationConfig = {
         provideAnimations(),
         provideHttpClient(
             withInterceptors([
-                ownerSignupInterceptor
+                ownerSignupInterceptor,
+                logoutInterceptor
             ])
         ),
         provideHotToastConfig({ position: "bottom-right", autoClose: true, dismissible: false }), // @ngneat/hot-toast providers

@@ -1,5 +1,5 @@
 export interface IDocument {
-    // _id?: string;
+    _id?: string;
     name: string;
     folder: string;
     // createdAt: string;

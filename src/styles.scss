@@ -99,6 +99,7 @@ $docman-theme: mat.define-dark-theme(
 @include mat.input-theme(light.$light-theme);
 @include mat.form-field-theme(light.$light-theme);
 @include mat.checkbox-theme(light.$light-theme);
+@include mat.menu-theme(light.$light-theme);
 
 @include login.theme(light.$light-theme);
 @include signup.theme(light.$light-theme);

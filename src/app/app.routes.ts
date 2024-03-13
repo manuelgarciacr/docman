@@ -1,4 +1,11 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router, Routes } from '@angular/router';
+import { UserService } from '@domain';
+
+const canActivateUser: CanActivateFn = () =>
+    inject(UserService).isAuthenticated()
+        ? true
+        : inject(Router).createUrlTree(['/login']);
 
 export const routes: Routes = [
     // {
@@ -34,6 +41,7 @@ export const routes: Routes = [
         path: "test",
         loadComponent: () => import("@app").then(c => c.TestComponent),
         data: { trn: "Test" },
+        canActivate: [canActivateUser]
     },
     // otherwise redirect to home or error page
     { path: "", redirectTo: "/login", pathMatch: "full" },

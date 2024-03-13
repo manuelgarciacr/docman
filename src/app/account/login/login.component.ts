@@ -144,16 +144,23 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
     protected setData = () => {
         const stay = this.getValue("stayLoggedIn") ?? false;
-        const email = this.trimValue("email").toLowerCase();
-        const password = this.getValue("password") as string;
-        const collection = this.trimValue("collection");
+        const email = this.trimValue("email").toLowerCase() ?? "";
+        const password = this.getValue("password") ?? "";
+        const collection = this.trimValue("collection") ?? "";
 
+        this.user.firstName = this.user.firstName ?? "";
+        this.user.lastName = this.user.lastName ?? "";
         this.user.email = this.getError("email") ? "" : email;
         this.user.password = this.getError("password") ? "" : password;
+        this.user.enabled = false;
+
         // Si el nombre de la colección cambia, la descripción se borra.
         collection != this.collection.name &&
             (this.collection.description = "");
         this.collection.name = this.getError("collection") ? "" : collection;
+        this.collection.users = [];
+        this.collection.roles = [];
+        this.collection.enabled = false;
 
         this.userService.setUser(this.user);
         this.collectionService.setCollection(this.collection);

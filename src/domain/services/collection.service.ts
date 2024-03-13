@@ -5,9 +5,28 @@ import { ICollection } from "@domain";
     providedIn: 'root',
 })
 export class CollectionService {
-    private _collection = signal<ICollection | null>(null)
+    private _collection = signal<ICollection | null>(null);
 
     readonly collection = this._collection.asReadonly();
 
-    setCollection = (collection: ICollection | null) => this._collection.set(collection);
+    setCollection = (collection: ICollection | null) => {
+
+        if (collection) {
+            const { _id, name, description, users, roles, documents, enabled } = collection;
+            collection = {
+                _id,
+                name,
+                description,
+                users,
+                roles,
+                documents,
+                enabled
+            };
+        }
+
+        this._collection.set(collection);
+        // const users = newCollection?.users;
+        // const roles = newCollection?.roles;
+        console.log("SETCOL", this.collection())
+    }
 }

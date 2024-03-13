@@ -48,6 +48,7 @@ $dark-variants: (
     @include mat.input-color($dark-theme);
     @include mat.form-field-color($dark-theme);
     @include mat.checkbox-color($dark-theme);
+    @include mat.menu-color($dark-theme);
 
     @include login.theme($dark-theme);
     @include signup.theme($dark-theme);

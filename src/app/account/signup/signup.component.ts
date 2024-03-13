@@ -195,12 +195,12 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
 
     setData = () => {
         const stay = this.getValue("stayLoggedIn") ?? false;
-        const firstName = this.trimValue("firstName");
-        const lastName = this.trimValue("lastName");
-        let email = this.trimValue("email").toLowerCase();
-        let password = this.getValue("password") as string;
-        let collection = this.trimValue("collection");
-        const description = this.trimValue("description");
+        const firstName = this.trimValue("firstName") ?? "";
+        const lastName = this.trimValue("lastName") ?? "";
+        let email = this.trimValue("email").toLowerCase() ?? "";
+        let password = this.getValue("password") ?? "";
+        let collection = this.trimValue("collection") ?? "";
+        const description = this.trimValue("description") ?? "";
 
         if (this.getError("email")) email = "";
         if (this.getError("password")) password = "";
@@ -219,6 +219,7 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
             users: [],
             roles: [],
             documents: [],
+            enabled: false
         });
         this.conf.setStayLoggedIn(stay);
     };

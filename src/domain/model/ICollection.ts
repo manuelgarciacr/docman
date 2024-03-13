@@ -12,12 +12,13 @@ export const ROLES: Role[] = [
 ];
 
 export interface ICollection {
-    // _id?: string;
+    _id?: string;
     name: string;
     description: string;
     users: string[]; // owner is included
     roles: string[]; // owner, default, etc
     documents: IDocument[];
+    enabled: boolean;
     // createdAt: string;
     // updatedAt: string;
     // __v: string

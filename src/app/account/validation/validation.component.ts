@@ -11,6 +11,7 @@ import { CountdownComponent, CountdownEvent, CountdownModule } from 'ngx-countdo
 import { HotToastService } from "@ngneat/hot-toast";
 import { tap } from 'rxjs';
 import { UserService } from '@domain';
+import { Router } from '@angular/router';
 
 const DISMISS = {
     autoClose: false,
@@ -45,6 +46,7 @@ export class ValidationComponent implements OnInit, AfterViewInit {
     private readonly toast = inject(HotToastService);
     private readonly repo = inject(AccountRepoService);
     private readonly userService = inject(UserService);
+    private readonly router = inject(Router);
 
     protected readonly validationForm = this.formBuilder.group({});
     protected readonly validationExpiration = this.userService.validationExpiration(); // In seconds
@@ -132,6 +134,7 @@ export class ValidationComponent implements OnInit, AfterViewInit {
         this.repo
             .ownerValidation()
             .pipe(
+                // TODO: Toast loading delay (like in logout method)
                 this.toast.observe({
                     loading: { content: "Validating" },
                     success: {
@@ -152,6 +155,7 @@ export class ValidationComponent implements OnInit, AfterViewInit {
                             getTokenPayload(this.userService.refreshToken()),
                             getTokenPayload(this.userService.accessToken())
                         );
+                        this.router.navigateByUrl("test");
                     } else {
                         this.toast.error(err, DISMISS);
                     }

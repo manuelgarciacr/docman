@@ -1,7 +1,7 @@
 import { HttpResponse, type HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { UserService } from '@domain';
-import { resp } from 'infrastructure/adapters/IHttpAdapter';
+import { CollectionService, UserService } from '@domain';
+import { Resp } from '@infrastructure';
 import { Observable, finalize, map } from 'rxjs';
 import { getTokenPayload } from '@utils';
 
@@ -11,6 +11,7 @@ export const ownerSignupInterceptor: HttpInterceptorFn = (
 ): Observable<HttpEvent<unknown>> => {
 
     const userService = inject(UserService);
+    const collectionService = inject(CollectionService);
     let authReq = req;
 
     if (
@@ -32,7 +33,8 @@ export const ownerSignupInterceptor: HttpInterceptorFn = (
                 event.status == 200
             ) {
                 try {
-                    const ownerToken = (event.body as resp<string>).data[0];
+                    const body = event.body as Resp<string[]>;
+                    const ownerToken = (body.data ?? [])[0];
                     const payload = getTokenPayload(ownerToken);
                     const expiration = payload.exp - payload.iat;
 
@@ -59,8 +61,15 @@ export const ownerSignupInterceptor: HttpInterceptorFn = (
                 event.status == 200
             ) {
                 try {
-                    const refreshToken = (event.body as resp<string>).data[0];
-                    const accessToken = (event.body as resp<string>).data[1];
+                    const body = event.body as Resp<string[]>;
+                    const refreshToken = (body.data ?? [])[0];
+                    const accessToken = (body.data ?? [])[1];
+                    const userStr = (body.data ?? [])[2];
+                    const collectionStr = (body.data ?? [])[3];
+                    const user = JSON.parse(userStr);
+                    const collection = JSON.parse(collectionStr);
+
+                    console.log("INTER", user, collection)
 
                     if (typeof refreshToken != "string" || refreshToken == "")
                         throw "Invalid refresh token."
@@ -71,6 +80,8 @@ export const ownerSignupInterceptor: HttpInterceptorFn = (
                     userService.setRefreshToken(refreshToken);
                     userService.setAccessToken(accessToken);
                     userService.removeOwnerToken();
+                    userService.setUser(user);
+                    collectionService.setCollection(collection);
 
                 } catch (error) {
                     let errorMsg = "";
