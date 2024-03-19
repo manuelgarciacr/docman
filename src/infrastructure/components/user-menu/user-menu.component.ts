@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from "@angular/material/menu";
 import { MatIconModule } from '@angular/material/icon';
-import { UserService } from '@domain';
+import { CollectionService, UserService } from '@domain';
 import { AccountRepoService, BtnComponent } from '@infrastructure';
 import { NgIf } from '@angular/common';
 import { HotToastService } from '@ngneat/hot-toast';
@@ -28,8 +28,9 @@ const DISMISS = {
     styleUrl: "./user-menu.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UserMenuComponent implements OnInit {
+export class UserMenuComponent {
     private readonly userService = inject(UserService);
+    private readonly collectionService = inject(CollectionService);
     private readonly repo = inject(AccountRepoService);
     private readonly toast = inject(HotToastService);
     private readonly router = inject(Router);
@@ -40,10 +41,6 @@ export class UserMenuComponent implements OnInit {
     protected hasGroup = signal(false);
 
     protected icon = this.isOwner() ? "supervisor_account" : "person";
-
-    ngOnInit(): void {
-        console.log(this.userService.user());
-    }
 
     protected logout = () => {
         if (this.logging) return;
@@ -78,14 +75,14 @@ export class UserMenuComponent implements OnInit {
                         clearTimeout(this.logging ?? undefined);
                         this.toast.close("loggingToast");
                         this.userService.setUser(null);
-                        this.router.navigateByUrl("login");
+                        this.collectionService.setCollection(null);
                         this.logging = null;
+                        this.router.navigateByUrl("login");
                     },
                 })
             )
             .subscribe({
-                next: resp => {
-                    console.log(resp);
+                next: () => {
                 },
                 error: err => console.error("LOGOUT", err),
             });

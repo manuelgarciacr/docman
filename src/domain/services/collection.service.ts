@@ -1,18 +1,27 @@
 import { Injectable, signal } from "@angular/core";
 import { ICollection } from "@domain";
 
+const sto = signal(sessionStorage);
+
 @Injectable({
-    providedIn: 'root',
+    providedIn: "root",
 })
 export class CollectionService {
     private _collection = signal<ICollection | null>(null);
 
     readonly collection = this._collection.asReadonly();
 
-    setCollection = (collection: ICollection | null) => {
+    constructor() {
+        const collectionStr = sto().getItem("collection");
+        const collection = collectionStr ? JSON.parse(collectionStr) : null;
 
+        this._collection.set(collection);
+    }
+
+    setCollection = (collection: ICollection | null) => {
         if (collection) {
-            const { _id, name, description, users, roles, documents, enabled } = collection;
+            const { _id, name, description, users, roles, documents, enabled } =
+                collection;
             collection = {
                 _id,
                 name,
@@ -20,13 +29,13 @@ export class CollectionService {
                 users,
                 roles,
                 documents,
-                enabled
+                enabled,
             };
+            sto().setItem("collection", JSON.stringify(collection));
+        } else {
+            sto().removeItem("collection");
         }
 
         this._collection.set(collection);
-        // const users = newCollection?.users;
-        // const roles = newCollection?.roles;
-        console.log("SETCOL", this.collection())
-    }
+    };
 }

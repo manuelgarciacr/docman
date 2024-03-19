@@ -185,8 +185,15 @@ export class LoginComponent implements OnInit, AfterViewInit {
                     console.error("LOGIN ERROR NEXT", resp)
                     return
                 }
-                console.log(resp);
-                this.router.navigateByUrl("test"); //, { replaceUrl: true });
+                const [user, collection] = resp.data as unknown as [IUser, ICollection];
+                const users = collection.users;
+                const roles = collection.roles;
+                const idx = users.indexOf(user._id ?? "")
+                const isOwner = roles[idx] == "owner";
+
+                this.userService.setUser(user, isOwner);
+                this.collectionService.setCollection(collection);
+                this.router.navigateByUrl("test", { replaceUrl: true });
             },
             error: err => console.error("LOGIN ERROR", err),
             complete: () => this.loading.set(false),

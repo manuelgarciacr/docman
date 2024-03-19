@@ -15,6 +15,7 @@ export const logoutInterceptor: HttpInterceptorFn = (
         req.url.endsWith("/accounts/logout")
     ) {
         const refreshToken = userService.refreshToken();
+
         authReq = req.clone({
             headers: req.headers.set("Authorization", refreshToken)
         })

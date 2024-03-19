@@ -177,3 +177,26 @@ $primary-palette: map.get($color-config, "primary");
     }
 }
 
+.dark-theme .mat-drawer-content {
+    --background-color: #{mat.get-color-from-palette($primary-palette, "default")};
+}
+
+.mat-drawer-content {
+    --background-color: #{mat.get-color-from-palette($primary-palette, 800)};
+    overflow: hidden!important;
+    .cls-svg-little{
+        position: absolute;
+        z-index: -1;
+        overflow: visible;
+        opacity: .8;
+
+        --top: 50%;
+        --left: 50%;
+        --deg: 360deg;
+
+        stroke: var(--background-color);
+        top: var(--top);
+        left: var(--left);
+        transform: rotate3d(1, 1, 1, var(--deg));
+    }
+}

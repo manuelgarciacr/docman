@@ -11,7 +11,7 @@ type T = {
     stayLoggedIn?: boolean;
 };
 
-type V = string;
+type V = string[];
 
 @Injectable({
     providedIn: "root",

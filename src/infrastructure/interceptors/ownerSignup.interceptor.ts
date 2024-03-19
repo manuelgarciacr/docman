@@ -69,8 +69,6 @@ export const ownerSignupInterceptor: HttpInterceptorFn = (
                     const user = JSON.parse(userStr);
                     const collection = JSON.parse(collectionStr);
 
-                    console.log("INTER", user, collection)
-
                     if (typeof refreshToken != "string" || refreshToken == "")
                         throw "Invalid refresh token."
 

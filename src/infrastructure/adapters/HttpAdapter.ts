@@ -90,7 +90,7 @@ export class HttpAdapter<T, V> implements IHttpAdapter<T, V> {
         else if (typeof arg == "object") params = params.appendAll(arg);
         else if (typeof arg != "undefined")
             throw new Error("Get param is invalid");
-console.log("HTTPOPTIONS:", { ...httpOptions, params });
+
         return this._post(url, body, params);
     };
 
@@ -150,7 +150,7 @@ console.log("HTTPOPTIONS:", { ...httpOptions, params });
             let status = 600;
             let message = (error as Error).message ?? "ERROR 600";
             let data;
-console.log("EEERRR", error)
+
             if (error instanceof HttpErrorResponse) {
                 status = error.status == 200 ? 1 : error.status;
                 message = error.message + ": " + error.error?.message;

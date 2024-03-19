@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, computed, inject, signal } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
 // import { TranslateModule, TranslateService } from '@ngx-translate/core';
 // import { noDragging } from 'utils/noDragging';
@@ -46,13 +46,41 @@ import { UserService } from '@domain';
         RouterOutlet,
         BtnComponent,
         SignupComponent,
-        UserMenuComponent
-    ]
+        UserMenuComponent,
+    ],
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, AfterViewInit {
+    ngAfterViewInit(): void {
+        const svgArray = this.elem.nativeElement.querySelectorAll(".cls-svg-little");
+        for (const k of Array(5).keys()) {
+            for (const svg of svgArray) {
+                const cl = svg.cloneNode(true);
+                cl.setAttribute("id", `id${k}`)
+                svg.parentElement.appendChild(cl);
+            }
+        }
+        setTimeout(() =>
+            this.elem.nativeElement
+                .querySelectorAll(".cls-svg-little")
+                .forEach((v: HTMLElement, k: number) => {
+                    const seg = 4 + k * 0.25;
+
+                    (v as HTMLElement).style.setProperty(
+                        "transition",
+                        `all ${seg}s linear`
+                    );
+                    v.addEventListener(
+                        "transitionend",
+                        event => this.newPos(event.target as HTMLElement, event.propertyName),
+                        false
+                    );
+                    this.newPos(v);
+                }))
+    }
     private readonly media = inject(MediaMatcher);
     private readonly router = inject(Router);
     private readonly userService = inject(UserService);
+    private readonly elem = inject(ElementRef);
 
     private matcher = this.media.matchMedia("(max-width: 600px)");
     private routerSubscription: Subscription = new Subscription();
@@ -67,7 +95,9 @@ export class NavbarComponent implements OnInit {
     protected hasBackBtn = () =>
         this.isMobile() && this.activeLink() == "/signup";
     protected signupComponent!: SignupComponent;
-    protected isAuthenticated = computed(() => this.userService.isAuthenticated());
+    protected isAuthenticated = computed(() =>
+        this.userService.isAuthenticated()
+    );
 
     ngOnInit(): void {
         // noDragging(this.host);
@@ -80,7 +110,6 @@ export class NavbarComponent implements OnInit {
                 this.accounting.set(route?.data?.["accounting"] ?? false);
             });
         this.links = routes.filter(v => v.data?.["trn"] != undefined);
-        console.log("ISATH", this.userService.user(), this.isAuthenticated())
     }
 
     ngOnDestroy(): void {
@@ -91,4 +120,44 @@ export class NavbarComponent implements OnInit {
     public onRouterOutletActivate(event: Component) {
         this.signupComponent = event as SignupComponent;
     }
+
+    private newPos = (svg: HTMLElement, property: string = "transform") => {
+
+        if (property != "transform")
+            return;
+
+        const _deg = svg.style.getPropertyValue("--deg");
+        const _side = parseInt(svg.style.getPropertyValue("--side"));
+        let top, left, side: number;
+
+        const pos = Math.random() * 85; // 100% - 15%
+        const deg = _deg == "0deg" ? "360deg" : "0deg";
+        do {
+            side = Math.floor(Math.random() * 4);
+        } while(side == _side)
+
+        switch (side) {
+            case 0:
+                top = 0;
+                left = pos;
+                break;
+            case 1:
+                top = pos;
+                left = 85;
+                break;
+            case 2:
+                top = 85;
+                left = pos;
+                break;
+            default:
+                top = pos;
+                left = 0;
+        }
+
+        svg.style.setProperty("--deg", `${deg}`);
+        svg.style.setProperty("--top", `${top}%`);
+        svg.style.setProperty("--left", `${left}%`);
+        svg.style.setProperty("--side", `${side}`);
+    };
+
 }

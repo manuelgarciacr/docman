@@ -14,10 +14,6 @@
         <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="navbar-tabnav" [style.display]="isMobile() || accounting() ? 'none' : 'block'"
             [backgroundColor]="'primary'">
             @for (link of links; track link) {
-                <!-- <a mat-tab-link (click)="activeLink = link.path" [active]="activeLink == link.path" [routerLink]="link.path"
-                    routerLinkActive="active" class="navbar-link text-capitalize">
-                    {{link.path}}
-                </a> -->
                 <a mat-tab-link [active]="activeLink().endsWith(link.path!)" [routerLink]="link.path"
                     routerLinkActive="active" class="navbar-link text-capitalize">
                     {{link.path}}
@@ -28,39 +24,34 @@
         <toggle-theme (collapseNavbar)="isMenuCollapsed = true" class="ms-auto"></toggle-theme>
         <user-menu *ngIf="isAuthenticated()" class="ms-2"></user-menu>
 
-        <!-- <div class="position-relative">
-            <login-control class="position-absolute"></login-control>
-        </div> -->
-        <!-- <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel> -->
-
-        <!-- <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
-            <mat-icon>favorite</mat-icon>
-        </button>
-        <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
-            <mat-icon>share</mat-icon>
-        </button> -->
     </mat-toolbar>
     <mat-drawer-container class="navbar-sidenav-container" [hasBackdrop]="true" [style.marginTop.px]="isMobile() ? 56 : 0">
-    <!-- <mat-drawer-container class="navbar-sidenav-container" [hasBackdrop]="true" > -->
         <mat-drawer #drawer [mode]="isMobile() ? 'over' : 'side'" fixedInViewport="isMobile" fixedTopGap="56">
             <mat-nav-list>
                 @for (link of links; track link) {
                     <a mat-list-item routerLink="." class="text-capitalize">{{link.path}}</a>
                 }
             </mat-nav-list>
-            <!-- <nav mat-tab-nav-bar [tabPanel]="tabPanel">
-            <a mat-tab-link *ngFor="let link of links" (click)="activeLink = link.path" [active]="activeLink == link.path"
-                [routerLink]="link.path" routerLinkActive="active" class="text-capitalize">
-                {{link.path}}
-            </a>
-        </nav> -->
         </mat-drawer>
 
         <mat-drawer-content>
+            <svg xmlns="http://www.w3.org/2000/svg" class="cls-svg-little" stroke-width="5" fill="transparent" height="15%" viewBox="0 -960 960 960" width="15%">
+                <path
+                    d="M320-240h320v-80H320v80Zm0-160h320v-80H320v80ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520ZM240-800v200-200 640-640Z" />
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="cls-svg-little" stroke-width="5" fill="transparent" height="15%" viewBox="0 -960 960 960" width="15%">
+                <path
+                    d="M240-80q-50 0-85-35t-35-85v-120h120v-560l60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60 60 60 60-60v680q0 50-35 85t-85 35H240Zm480-80q17 0 28.5-11.5T760-200v-560H320v440h360v120q0 17 11.5 28.5T720-160ZM360-600v-80h240v80H360Zm0 120v-80h240v80H360Zm320-120q-17 0-28.5-11.5T640-640q0-17 11.5-28.5T680-680q17 0 28.5 11.5T720-640q0 17-11.5 28.5T680-600Zm0 120q-17 0-28.5-11.5T640-520q0-17 11.5-28.5T680-560q17 0 28.5 11.5T720-520q0 17-11.5 28.5T680-480ZM240-160h360v-80H200v40q0 17 11.5 28.5T240-160Zm-40 0v-80 80Z" />
+            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="cls-svg-little" stroke-width="5" fill="transparent" height="15%" viewBox="0 -960 960 960" width="15%">
+                <path
+                    d="M360-460h40v-80h40q17 0 28.5-11.5T480-580v-40q0-17-11.5-28.5T440-660h-80v200Zm40-120v-40h40v40h-40Zm120 120h80q17 0 28.5-11.5T640-500v-120q0-17-11.5-28.5T600-660h-80v200Zm40-40v-120h40v120h-40Zm120 40h40v-80h40v-40h-40v-40h40v-40h-80v200ZM320-240q-33 0-56.5-23.5T240-320v-480q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H320Zm0-80h480v-480H320v480ZM160-80q-33 0-56.5-23.5T80-160v-560h80v560h560v80H160Zm160-720v480-480Z" />
+            </svg>
             <router-outlet #routeroutlettag
-                 (activate)="onRouterOutletActivate($event)"></router-outlet>
+                 (activate)="onRouterOutletActivate($event)">
+            </router-outlet>
             <mat-tab-nav-panel #tabPanel></mat-tab-nav-panel>
-            <!-- <p *ngFor="let content of fillerContent">{{content}}</p> -->
+
         </mat-drawer-content>
     </mat-drawer-container>
 </div>
