@@ -4,9 +4,12 @@ import {
     ChangeDetectionStrategy,
     Component,
     ElementRef,
+    Injector,
     OnInit,
     ViewChild,
+    effect,
     inject,
+    runInInjectionContext,
     signal,
 } from "@angular/core";
 import {
@@ -23,7 +26,6 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatIconModule } from "@angular/material/icon";
 import { MatInputModule } from "@angular/material/input";
 import {
-    ConfigurationService,
     UserService,
     CollectionService,
     IUser,
@@ -32,6 +34,13 @@ import {
 import { ltrimFormControl, trimFormControl } from "@utils";
 import { AccountRepoService, BtnComponent } from "@infrastructure";
 import { Router } from "@angular/router";
+import { HotToastService } from "@ngneat/hot-toast";
+import { tap } from "rxjs";
+
+const DISMISS = {
+    autoClose: false,
+    dismissible: true,
+};
 
 @Component({
     selector: "app-login",
@@ -58,16 +67,16 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private readonly repo = inject(AccountRepoService);
     private readonly router = inject(Router);
     private readonly formBuilder = inject(FormBuilder);
-    private readonly configurationService = inject(ConfigurationService);
     private readonly userService = inject(UserService);
     private readonly collectionService = inject(CollectionService);
+    private readonly toast = inject(HotToastService);
+    private readonly injector = inject(Injector);
 
-    private readonly loading = signal(false);
-    private readonly stayLoggedIn = this.configurationService.getConfig().stayLoggedIn;
     private readonly user = this.userService.user() ?? <IUser>{};
     private readonly collection =
         this.collectionService.collection() ?? <ICollection>{};
 
+    protected readonly loading = signal(false);
     protected loginForm: FormGroup = this.formBuilder.group({});
     protected pwdState = {
         type: ["password", "text"],
@@ -94,9 +103,17 @@ export class LoginComponent implements OnInit, AfterViewInit {
             collection: new FormControl(this.collection.name, {
                 validators: [ltrimFormControl, Validators.required],
             }),
-            stayLoggedIn: new FormControl(this.stayLoggedIn, {}),
         };
         this.loginForm = this.formBuilder.group(formGroup);
+
+        runInInjectionContext(this.injector, () => {
+            effect(() => {
+                if (this.loading())
+                    this.loginForm.disable()
+                else
+                    this.loginForm.enable()
+            });
+        });
     }
 
     ngAfterViewInit(): void {
@@ -141,9 +158,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     protected togglePwdState = () =>
         (this.pwdState.state = 1 - this.pwdState.state);
 
-
     protected setData = () => {
-        const stay = this.getValue("stayLoggedIn") ?? false;
         const email = this.trimValue("email").toLowerCase() ?? "";
         const password = this.getValue("password") ?? "";
         const collection = this.trimValue("collection") ?? "";
@@ -155,8 +170,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.user.enabled = false;
 
         // Si el nombre de la colección cambia, la descripción se borra.
-        collection != this.collection.name &&
-            (this.collection.description = "");
+        if (collection != this.collection.name) {
+            this.collection.description = "";
+            this.collection.stayLoggedIn = false;
+        }
+
         this.collection.name = this.getError("collection") ? "" : collection;
         this.collection.users = [];
         this.collection.roles = [];
@@ -164,40 +182,63 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
         this.userService.setUser(this.user);
         this.collectionService.setCollection(this.collection);
-        this.configurationService.setStayLoggedIn(stay);
     };
 
     protected login = () => {
-
         this.setData();
-
         const user = this.userService.user()!;
         const collection = this.collectionService.collection()!;
+        const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
 
         collection!.users = [];
         collection!.roles = [];
         collection!.documents = [];
 
         this.loading.set(true);
-        this.repo.login({ user, collection }).subscribe({
-            next: resp => {
-                if (resp.status != 200) {
-                    console.error("LOGIN ERROR NEXT", resp)
-                    return
-                }
-                const [user, collection] = resp.data as unknown as [IUser, ICollection];
-                const users = collection.users;
-                const roles = collection.roles;
-                const idx = users.indexOf(user._id ?? "")
-                const isOwner = roles[idx] == "owner";
+        this.repo
+            .login({ user, collection })
+            .pipe(
+                this.toast.observe({
+                    loading: { content: "Logging in" },
+                    success: {
+                        content: "Success",
+                        style: { display: "none" },
+                    },
+                    error: {
+                        content: err => `Error: ${err.toString()}`,
+                    },
+                }),
+                tap(resp => {
+                    const err = briefError(resp.message.toString());
+                    if (resp.status == 200) {
+                        this.toast.success("Successful login");
+                    } else {
+                        this.toast.error(err, DISMISS);
+                    }
+                })
+            )
+            .subscribe({
+                next: resp => {
+                    if (resp.status != 200) {
+                        console.error("LOGIN ERROR NEXT", resp);
+                        return;
+                    }
+                    const [user, collection] = resp.data as unknown as [
+                        IUser,
+                        ICollection
+                    ];
+                    const users = collection.users;
+                    const roles = collection.roles;
+                    const idx = users.indexOf(user._id ?? "");
+                    const isOwner = roles[idx] == "owner";
 
-                this.userService.setUser(user, isOwner);
-                this.collectionService.setCollection(collection);
-                this.router.navigateByUrl("test", { replaceUrl: true });
-            },
-            error: err => console.error("LOGIN ERROR", err),
-            complete: () => this.loading.set(false),
-        });
+                    this.userService.setUser(user, isOwner);
+                    this.collectionService.setCollection(collection);
+                    this.router.navigateByUrl("test", { replaceUrl: true });
+                },
+                error: err => console.error("LOGIN ERROR", err),
+                complete: () => this.loading.set(false),
+            });
     };
 
     // Form Control helpers

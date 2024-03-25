@@ -8,17 +8,13 @@ export const logoutInterceptor: HttpInterceptorFn = (
     next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
 
+    if (!req.url.endsWith("/accounts/logout")) return next(req);
+
     const userService = inject(UserService);
-    let authReq = req;
+    const refreshToken = userService.refreshToken();
+    const authReq = req.clone({
+        headers: req.headers.set("Authorization", refreshToken)
+    })
 
-    if (
-        req.url.endsWith("/accounts/logout")
-    ) {
-        const refreshToken = userService.refreshToken();
-
-        authReq = req.clone({
-            headers: req.headers.set("Authorization", refreshToken)
-        })
-    }
     return next(authReq)
 };

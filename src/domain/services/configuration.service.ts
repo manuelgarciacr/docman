@@ -6,19 +6,26 @@ import {
     providedIn: "root",
 })
 export class ConfigurationService {
+    // private _config: {
+    //     theme: "dark" | "light" | "system";
+    //     stayLoggedIn: boolean;
+    // } = { theme: "light", stayLoggedIn: false };
     private _config: {
-        theme: "dark" | "light" | "system";
-        stayLoggedIn: boolean;
-    } = { theme: "light", stayLoggedIn: false };
+        theme: "dark" | "light" | "system"
+    } = { theme: "light" };
 
     constructor() {
         const config = localStorage.getItem("config") ?? "";
         const syspref = this.getSyspref();
 
+        // if (config == "" && syspref != "undefined")
+        //     this._config = { theme: "system", stayLoggedIn: false };
+        // else if (config == "")
+        //     this._config = { theme: "light", stayLoggedIn: false };
+        // else this._config = JSON.parse(config);
         if (config == "" && syspref != "undefined")
-            this._config = { theme: "system", stayLoggedIn: false };
-        else if (config == "")
-            this._config = { theme: "light", stayLoggedIn: false };
+            this._config = { theme: "system" };
+        else if (config == "") this._config = { theme: "light" };
         else this._config = JSON.parse(config);
 
         if (this._config.theme == ("system" as const) && syspref == "undefined")
@@ -57,10 +64,10 @@ export class ConfigurationService {
         return theme;
     };
 
-    setStayLoggedIn = (stay: boolean) => {
-        this._config.stayLoggedIn = stay;
-        localStorage.setItem("config", JSON.stringify(this._config));
-    };
+    // setStayLoggedIn = (stay: boolean) => {
+    //     this._config.stayLoggedIn = stay;
+    //     localStorage.setItem("config", JSON.stringify(this._config));
+    // };
 
     getConfig() {
         return this._config;

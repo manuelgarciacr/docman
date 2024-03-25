@@ -1,4 +1,4 @@
-import { Observable, TimeoutError, catchError, of, retry, timeout, timer } from "rxjs";
+import { Observable, TimeoutError, catchError, delay, of, retry, timeout, timer } from "rxjs";
 import { IHttpAdapter, Params, Resp } from "./IHttpAdapter";
 import {
     HttpClient,
@@ -100,7 +100,8 @@ export class HttpAdapter<T, V> implements IHttpAdapter<T, V> {
             .pipe(
                 timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
-                catchError(this.handleError<V>("http post"))
+                catchError(this.handleError<V>("http post")),
+delay(3000),
             );
 
     // post = (url: string, data: T, action?: string) => {

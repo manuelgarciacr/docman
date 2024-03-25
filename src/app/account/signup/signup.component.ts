@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { NavigationStart, Router } from '@angular/router';
-import { CollectionService, ConfigurationService, UserService } from '@domain';
+import { CollectionService, UserService } from '@domain';
 import { AccountRepoService, BtnComponent } from '@infrastructure';
 import { HotToastService } from '@ngneat/hot-toast';
 import { UniqueCollectionValidator, UniqueEmailValidator, passwordValidator, ltrimFormControl, trimFormControl } from '@utils';
@@ -43,13 +43,14 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild("firstItem") firstItem!: ElementRef;
     private readonly router = inject(Router);
     private readonly repo = inject(AccountRepoService);
-    private readonly conf = inject(ConfigurationService);
+    //private readonly conf = inject(ConfigurationService);
     private readonly formBuilder = inject(FormBuilder);
     private readonly userService = inject(UserService);
     private readonly collectionService = inject(CollectionService);
     private readonly toast = inject(HotToastService);
     private readonly changeDetectionRef = inject(ChangeDetectorRef);
     //private readonly uniqueEmailValidator = inject(UniqueEmailValidator());
+
     private readonly uniqueEmailValidator = new UniqueEmailValidator(
         this.changeDetectionRef
     );
@@ -63,8 +64,9 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
     private navigationSubscription?: Subscription;
     private media = inject(MediaMatcher);
     private matcher = this.media.matchMedia("(max-width: 600px)");
+    protected readonly loading = signal(false);
     protected isMobile = signal(this.matcher.matches);
-    private matcherListener = (e: MediaQueryListEvent) =>
+    protected matcherListener = (e: MediaQueryListEvent) =>
         this.isMobile.set(e.matches ? true : false);
     protected signupForm: FormGroup = this.formBuilder.group({});
     protected pwdState = {
@@ -123,7 +125,7 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
                 validators: [ltrimFormControl],
             }),
             stayLoggedIn: new FormControl(
-                this.conf.getConfig().stayLoggedIn,
+                this.collection?.stayLoggedIn ?? false,
                 {}
             ),
         };
@@ -133,6 +135,7 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
         if (this.getValue("email") != "") this.getCtrl("email").markAsTouched();
         if (this.getValue("collection") != "")
             this.getCtrl("collection").markAsTouched();
+
         this.navigationSubscription = this.router.events.subscribe(e => {
             if (e instanceof NavigationStart) {
                 this.uniqueEmailValidator.cancel();
@@ -194,49 +197,49 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
         (this.pwdState.state = 1 - this.pwdState.state);
 
     setData = () => {
-        const stay = this.getValue("stayLoggedIn") ?? false;
         const firstName = this.trimValue("firstName") ?? "";
         const lastName = this.trimValue("lastName") ?? "";
+        const description = this.trimValue("description") ?? "";
+        const stayLoggedIn = this.getValue("stayLoggedIn") ?? false;
         let email = this.trimValue("email").toLowerCase() ?? "";
         let password = this.getValue("password") ?? "";
         let collection = this.trimValue("collection") ?? "";
-        const description = this.trimValue("description") ?? "";
 
         if (this.getError("email")) email = "";
         if (this.getError("password")) password = "";
         if (this.getError("collection")) collection = "";
 
         this.userService.setUser({
-            email: email,
-            password: password,
-            firstName: firstName,
-            lastName: lastName,
+            email,
+            password,
+            firstName,
+            lastName,
             enabled: false,
         });
         this.collectionService.setCollection({
             name: collection,
-            description: description,
+            description,
+            stayLoggedIn,
             users: [],
             roles: [],
             documents: [],
-            enabled: false
+            enabled: false,
         });
-        this.conf.setStayLoggedIn(stay);
     };
 
     protected signup = () => {
         this.setData();
         const user = this.userService.user()!;
         const collection = this.collectionService.collection()!;
-        const stayLoggedIn = this.conf.getConfig().stayLoggedIn;
         const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
 
         collection!.users = [];
         collection!.roles = [];
         collection!.documents = [];
 
+        this.loading.set(true);
         this.repo
-            .ownerSignup({ user, collection, stayLoggedIn })
+            .ownerSignup({ user, collection })
             .pipe(
                 this.toast.observe({
                     loading: { content: "Registering" },
@@ -261,11 +264,11 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
             )
             .subscribe({
                 next: resp => {
-                    console.log(resp);
                     if (resp.status == 200)
                         this.router.navigateByUrl("validation"); //, { replaceUrl: true });
                 },
                 error: err => console.error("SIGNUP ERROR", err),
+                complete: () => this.loading.set(false),
             });
     };
 

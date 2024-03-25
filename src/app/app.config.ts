@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideHotToastConfig } from "@ngneat/hot-toast";
-import { logoutInterceptor, ownerSignupInterceptor } from 'infrastructure/interceptors';
+import { loginInterceptor, logoutInterceptor, ownerSignupInterceptor } from 'infrastructure/interceptors';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -14,6 +14,7 @@ export const appConfig: ApplicationConfig = {
         provideHttpClient(
             withInterceptors([
                 ownerSignupInterceptor,
+                loginInterceptor,
                 logoutInterceptor
             ])
         ),

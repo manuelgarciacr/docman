@@ -77,6 +77,7 @@ export const ownerSignupInterceptor: HttpInterceptorFn = (
 
                     userService.setRefreshToken(refreshToken);
                     userService.setAccessToken(accessToken);
+                    userService.setValidationCode("");
                     userService.removeOwnerToken();
                     userService.setUser(user);
                     collectionService.setCollection(collection);

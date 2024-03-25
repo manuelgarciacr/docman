@@ -7,8 +7,7 @@ const url = `${environment.apiUrl}/accounts`;
 
 type T = {
     user?: IUser;
-    collection?: ICollection;
-    stayLoggedIn?: boolean;
+    collection?: ICollection
 };
 
 type V = string[];

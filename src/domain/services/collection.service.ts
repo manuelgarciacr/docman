@@ -20,12 +20,13 @@ export class CollectionService {
 
     setCollection = (collection: ICollection | null) => {
         if (collection) {
-            const { _id, name, description, users, roles, documents, enabled } =
+            const { _id, name, description, stayLoggedIn, users, roles, documents, enabled } =
                 collection;
             collection = {
                 _id,
                 name,
                 description,
+                stayLoggedIn,
                 users,
                 roles,
                 documents,

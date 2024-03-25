@@ -15,6 +15,7 @@ export interface ICollection {
     _id?: string;
     name: string;
     description: string;
+    stayLoggedIn: boolean;
     users: string[]; // owner is included
     roles: string[]; // owner, default, etc
     documents: IDocument[];
