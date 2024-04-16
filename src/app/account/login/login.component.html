@@ -61,8 +61,10 @@
             Log in
         </btn-component>
         <div class="d-flex justify-content-between align-items-baseline">
-            <btn-component type="button" [disabled]="loading()" class="cls-forgotpwd">
-                Forgot password
+            <btn-component type="button" [disabled]="!getCtrl('email').valid || !getCtrl('collection').valid || loading()"
+                (click2)="forgotPassword()"
+                class="cls-forgotpwd">
+                Forgot password?
             </btn-component>
             <btn-component type="button" (click2)="setData()" [routerLink]="'/signup'"
                 [disabled]="loading()" class="cls-signup m-1">

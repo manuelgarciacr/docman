@@ -2,11 +2,8 @@ import { AfterViewInit, Component, ElementRef, OnInit, computed, inject, signal 
 import { NgFor, NgIf } from '@angular/common';
 // import { TranslateModule, TranslateService } from '@ngx-translate/core';
 // import { noDragging } from 'utils/noDragging';
-import { NavigationEnd, Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Route, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { routes } from 'app/app.routes';
-// import { ToggleThemeComponent } from "../toggle-theme/toggle-theme.component";
-// import { ToggleLangComponent } from "../toggle-lang/toggle-lang.component";
-// import { LoginControlComponent } from "../login-control/login-control.component";
 import { MatIconModule } from "@angular/material/icon";
 import { MatToolbarModule } from "@angular/material/toolbar";
 import { MatTabsModule } from "@angular/material/tabs";
@@ -15,7 +12,7 @@ import { MatSidenavModule } from "@angular/material/sidenav";
 import { MatListModule } from "@angular/material/list";
 import { BtnComponent, ToggleThemeComponent, UserMenuComponent } from '@infrastructure';
 import { RouterOutlet } from "@angular/router";
-import { Subscription, filter } from 'rxjs';
+import { Subscription, filter, tap } from 'rxjs';
 import { SignupComponent } from '@app';
 import { UserService } from '@domain';
 
@@ -25,17 +22,11 @@ import { UserService } from '@domain';
     templateUrl: "./navbar.component.html",
     styleUrls: ["./navbar.component.scss"],
     imports: [
-        // CommonModule,
-        // NgbDropdownModule,
-        // NgbCollapse,
         NgFor,
         NgIf,
         // TranslateModule,
         RouterLink,
         RouterLinkActive,
-        // ToggleThemeComponent,
-        // ToggleLangComponent,
-        // LoginControlComponent,
         MatTabsModule,
         MatToolbarModule,
         MatIconModule,
@@ -50,35 +41,9 @@ import { UserService } from '@domain';
     ],
 })
 export class NavbarComponent implements OnInit, AfterViewInit {
-    ngAfterViewInit(): void {
-        const svgArray = this.elem.nativeElement.querySelectorAll(".cls-svg-little");
-        for (const k of Array(5).keys()) {
-            for (const svg of svgArray) {
-                const cl = svg.cloneNode(true);
-                cl.setAttribute("id", `id${k}`)
-                svg.parentElement.appendChild(cl);
-            }
-        }
-        setTimeout(() =>
-            this.elem.nativeElement
-                .querySelectorAll(".cls-svg-little")
-                .forEach((v: HTMLElement, k: number) => {
-                    const seg = 4 + k * 0.25;
-
-                    (v as HTMLElement).style.setProperty(
-                        "transition",
-                        `all ${seg}s linear`
-                    );
-                    v.addEventListener(
-                        "transitionend",
-                        event => this.newPos(event.target as HTMLElement, event.propertyName),
-                        false
-                    );
-                    this.newPos(v);
-                }))
-    }
     private readonly media = inject(MediaMatcher);
     private readonly router = inject(Router);
+    private readonly activatedRoute = inject(ActivatedRoute);
     private readonly userService = inject(UserService);
     private readonly elem = inject(ElementRef);
 
@@ -103,13 +68,51 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         // noDragging(this.host);
         this.matcher.addEventListener("change", this.matcherListener);
         this.routerSubscription = this.router.events
-            .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
-            .subscribe(e => {
-                this.activeLink.set(e.url);
-                const route = routes.find(v => e.url.endsWith(v.path!));
-                this.accounting.set(route?.data?.["accounting"] ?? false);
-            });
+            .pipe(
+                filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+                tap( (e) => {
+                    const child = this.activatedRoute.firstChild;
+                    const accounting = child?.snapshot.data["accounting"] ?? false;
+                    this.activeLink.set(e.url);
+                    this.accounting.set(accounting)
+                })
+            )
+            .subscribe();
         this.links = routes.filter(v => v.data?.["trn"] != undefined);
+    }
+
+    ngAfterViewInit(): void {
+        const svgArray =
+            this.elem.nativeElement.querySelectorAll(".cls-svg-little");
+        for (const k of Array(5).keys()) {
+            for (const svg of svgArray) {
+                const cl = svg.cloneNode(true);
+                cl.setAttribute("id", `id${k}`);
+                svg.parentElement.appendChild(cl);
+            }
+        }
+        setTimeout(() =>
+            this.elem.nativeElement
+                .querySelectorAll(".cls-svg-little")
+                .forEach((v: HTMLElement, k: number) => {
+                    const seg = 4 + k * 0.25;
+
+                    (v as HTMLElement).style.setProperty(
+                        "transition",
+                        `all ${seg}s linear`
+                    );
+                    v.addEventListener(
+                        "transitionend",
+                        event =>
+                            this.newPos(
+                                event.target as HTMLElement,
+                                event.propertyName
+                            ),
+                        false
+                    );
+                    this.newPos(v);
+                })
+        );
     }
 
     ngOnDestroy(): void {
@@ -122,9 +125,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
     }
 
     private newPos = (svg: HTMLElement, property: string = "transform") => {
-
-        if (property != "transform")
-            return;
+        if (property != "transform") return;
 
         const _deg = svg.style.getPropertyValue("--deg");
         const _side = parseInt(svg.style.getPropertyValue("--side"));
@@ -134,7 +135,7 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         const deg = _deg == "0deg" ? "360deg" : "0deg";
         do {
             side = Math.floor(Math.random() * 4);
-        } while(side == _side)
+        } while (side == _side);
 
         switch (side) {
             case 0:
@@ -159,5 +160,4 @@ export class NavbarComponent implements OnInit, AfterViewInit {
         svg.style.setProperty("--left", `${left}%`);
         svg.style.setProperty("--side", `${side}`);
     };
-
 }

@@ -1,0 +1,12 @@
+:host {
+    display: block;
+
+    .cls-email {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    mat-error {
+        margin-top: -1.5rem
+    }
+    max-height: 75%;
+}

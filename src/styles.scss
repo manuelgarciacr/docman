@@ -6,79 +6,9 @@
 
 // Plus imports for other components in your app.
 @use "./app/account/login/login-theme" as login;
-@use "./app/account/signup/signup-theme" as signup;
+//@use "./app/account/signup/signup-theme" as signup;
 @use "./infrastructure/components/btn/btn-theme" as btn;
 
-/*
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat.core();
-
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$docman-palette: (
-    50: #e0f1f3,
-    100: #b3dde0,
-    200: #81c8cc,
-    300: #4eb3b6,
-    400: #29a2a4,
-    500: #0b9292,
-    600: #0a8584,
-    700: #0a7573,
-    800: #0d6563,
-    900: #0d4a46,
-    A100: #aafffd,
-    A200: #60ffff,
-    A400: #00f7fe,
-    A700: #00c9cf,
-    contrast: (
-        50: #000000,
-        100: #000000,
-        200: #000000,
-        300: #000000,
-        400: #ffffff,
-        500: #ffffff,
-        600: #ffffff,
-        700: #ffffff,
-        800: #ffffff,
-        900: #ffffff,
-        A100: #000000,
-        A200: #000000,
-        A400: #000000,
-        A700: #000000,
-    ),
-);
-
-$docman-primary: mat.define-palette($docman-palette);
-$docman-accent: mat.define-palette($docman-palette, A200, A100, A400);
-// The warn palette is optional (defaults to red).
-$docman-warn: mat.define-palette(mat.$red-palette);
-
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
-$docman-theme: mat.define-dark-theme(
-    (
-        color: (
-            primary: $docman-primary,
-            accent: $docman-accent,
-            warn: $docman-warn,
-        ),
-        typography: mat.define-typography-config(),
-        density: 0,
-    )
-);
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.core-theme($docman-theme);
-@include mat.all-component-themes($docman-theme);
-// .custom-theme {
-//     @include mat.button-theme($custom-theme);
-// }
-
-*/
 /* You can add global styles to this file, and also import other style files */
 
 @use "../src/styles/themes/light";
@@ -93,16 +23,15 @@ $docman-theme: mat.define-dark-theme(
 
 @include mat.core-theme(light.$light-theme);
 @include mat.button-theme(light.$light-theme);
-//@include mat.icon-button-theme(light.$light-theme);
 @include mat.toolbar-theme(light.$light-theme);
 @include mat.tabs-theme(light.$light-theme);
 @include mat.input-theme(light.$light-theme);
 @include mat.form-field-theme(light.$light-theme);
 @include mat.checkbox-theme(light.$light-theme);
 @include mat.menu-theme(light.$light-theme);
+@include mat.dialog-theme(light.$light-theme);
 
 @include login.theme(light.$light-theme);
-@include signup.theme(light.$light-theme);
 @include btn.theme(light.$light-theme);
 
 @include mat.typography-hierarchy(typography.$docman-typography);
@@ -198,5 +127,15 @@ $primary-palette: map.get($color-config, "primary");
         top: var(--top);
         left: var(--left);
         transform: rotate3d(1, 1, 1, var(--deg));
+    }
+}
+
+app-users, dlg {
+    h2 {
+        background-color: var(--background-color);
+        color: white!important;
+        margin-bottom: 0rem!important;
+        padding-bottom: 1rem!important;
+        --background-color: #{mat.get-color-from-palette($primary-palette, "default")};
     }
 }

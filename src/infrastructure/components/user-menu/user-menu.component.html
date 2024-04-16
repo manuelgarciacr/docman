@@ -1,20 +1,16 @@
 <btn-component mat-raised-button [matMenuTriggerFor]="menu" aria-label="User menu" degree="'0'" type="button">
-    <!-- <button mat-raised-button [matMenuTriggerFor]="menu" aria-label="User menu"> -->
-        <mat-icon>{{ icon }}</mat-icon>
-    <!-- </button> -->
-    <!-- <img src="assets/svg/sun-fill.svg" alt="alt"
-        title="title" width="32" height="24" /> -->
+    <mat-icon>{{ icon }}</mat-icon>
 </btn-component>
 <mat-menu #menu="matMenu">
-    <button *ngIf="isOwner()" mat-menu-item>
-        <mat-icon>person_add</mat-icon>
-        <span>Add users</span>
+    <button *ngIf="isOwner()" (click)="users()" mat-menu-item>
+        <mat-icon>group</mat-icon>
+        <span>Add/remove users</span>
     </button>
     <button *ngIf="isOwner()" mat-menu-item disabled="!hasGroup()">
         <mat-icon>person_remove</mat-icon>
         <span>Remove user</span>
     </button>
-    <button mat-menu-item>
+    <button mat-menu-item (click)="removeAccount()">
         <mat-icon [style.color]="'red'">account_circle_off</mat-icon>
         <span>Remove account</span>
     </button>

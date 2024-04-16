@@ -20,7 +20,7 @@ export class CollectionService {
 
     setCollection = (collection: ICollection | null) => {
         if (collection) {
-            const { _id, name, description, stayLoggedIn, users, roles, documents, enabled } =
+            const { _id, name, description, stayLoggedIn, users, roles, enabled } =
                 collection;
             collection = {
                 _id,
@@ -29,7 +29,6 @@ export class CollectionService {
                 stayLoggedIn,
                 users,
                 roles,
-                documents,
                 enabled,
             };
             sto().setItem("collection", JSON.stringify(collection));

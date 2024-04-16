@@ -77,6 +77,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.collectionService.collection() ?? <ICollection>{};
 
     protected readonly loading = signal(false);
+    protected readonly working = signal<ReturnType<typeof setTimeout> | null>(null);
     protected loginForm: FormGroup = this.formBuilder.group({});
     protected pwdState = {
         type: ["password", "text"],
@@ -108,10 +109,8 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
         runInInjectionContext(this.injector, () => {
             effect(() => {
-                if (this.loading())
-                    this.loginForm.disable()
-                else
-                    this.loginForm.enable()
+                if (this.loading()) this.loginForm.disable();
+                else this.loginForm.enable();
             });
         });
     }
@@ -186,13 +185,26 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
     protected login = () => {
         this.setData();
-        const user = this.userService.user()!;
-        const collection = this.collectionService.collection()!;
+        const _user = this.userService.user();
+        const email = _user?.email ?? "";
+        const password = _user?.password ?? "";
+        const name = this.collectionService.collection()?.name ?? "";
+        const user: IUser = {
+            email,
+            password,
+            firstName: "",
+            lastName: "",
+            enabled: false,
+        };
+        const collection: ICollection = {
+            name,
+            description: "",
+            enabled: false,
+            stayLoggedIn: false,
+            users: [],
+            roles: [],
+        };
         const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
-
-        collection!.users = [];
-        collection!.roles = [];
-        collection!.documents = [];
 
         this.loading.set(true);
         this.repo
@@ -223,22 +235,76 @@ export class LoginComponent implements OnInit, AfterViewInit {
                         console.error("LOGIN ERROR NEXT", resp);
                         return;
                     }
-                    const [user, collection] = resp.data as unknown as [
-                        IUser,
-                        ICollection
-                    ];
-                    const users = collection.users;
-                    const roles = collection.roles;
-                    const idx = users.indexOf(user._id ?? "");
-                    const isOwner = roles[idx] == "owner";
-
-                    this.userService.setUser(user, isOwner);
-                    this.collectionService.setCollection(collection);
                     this.router.navigateByUrl("test", { replaceUrl: true });
                 },
                 error: err => console.error("LOGIN ERROR", err),
                 complete: () => this.loading.set(false),
             });
+    };
+
+    protected forgotPassword = () => {
+        if (this.working()) return;
+
+        this.setData();
+
+        const email = this.userService.user()?.email ?? "";
+        const name = this.collectionService.collection()?.name ?? "";
+        const user: IUser = {
+            email,
+            password: "",
+            firstName: "",
+            lastName: "",
+            enabled: false,
+        };
+        const collection: ICollection = {
+            name,
+            description: "",
+            enabled: false,
+            stayLoggedIn: false,
+            users: [],
+            roles: [],
+        };
+        const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
+
+        const timeout = setTimeout(() => {
+            if (!this.working()) return;
+
+            this.toast.loading(`Validating data in progress`, {
+                autoClose: false,
+                dismissible: true,
+                id: "workingToast",
+            });
+        }, 500);
+
+        this.working.set(timeout);
+
+        this.repo
+            .forgotPassword({ user, collection })
+            .pipe(
+                tap({
+                    next: resp => {
+                        const err = briefError(resp.message.toString());
+
+                        if (resp.status == 200) {
+                            this.toast.success("Successful validation.");
+                            this.router.navigateByUrl(
+                                "validation/forgotpassword",
+                                { replaceUrl: true }
+                            );
+                        } else {
+                            this.toast.error(err, DISMISS);
+                        }
+                    },
+                    // Operation failed; error is an HttpErrorResponse
+                    error: _error => console.log("Password validation error:", _error),
+                    complete: () => {
+                        clearTimeout(this.working() ?? undefined);
+                        this.toast.close("workingToast");
+                        this.working.set(null);
+                        this.loading.set(false);
+                    },
+                })
+            ).subscribe()
     };
 
     // Form Control helpers

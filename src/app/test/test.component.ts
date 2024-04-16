@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { BtnComponent } from '@infrastructure';
 
 @Component({
-    //selector: "app-test",
     standalone: true,
     imports: [BtnComponent,
-        MatButtonModule],
+        MatButtonModule,
+    MatIconModule],
     templateUrl: "./test.component.html",
     styleUrl: "./test.component.scss",
     changeDetection: ChangeDetectionStrategy.OnPush,

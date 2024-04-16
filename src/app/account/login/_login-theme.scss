@@ -7,27 +7,20 @@
     $warn-palette: map.get($color-config, "warn");
     $is-dark-theme: map.get($color-config, "is-dark");
     $exportBackgroundOpacity: if($is-dark-theme, 0.32, 0.06);
-    // $color: mat.get-color-from-palette(
-    //     $primary-palette,
-    //     if($is-dark-theme, 50, default)
-    // );
     // $foreground: map.get($color-config, "foreground");
     // $background: map.get($color-config, "background");
-    // $color: if($is-dark-theme,
-    //     map.get($foreground, "text"),
-    //     mat.get-color-from-palette($primary-palette, "default-contrast"));
     // $color: if($is-dark-theme,
     //     mat.get-color-from-palette($primary-palette, 300-contrast),
     //     mat.get-color-from-palette($primary-palette, "default-contrast"));
 
     $background-color: if($is-dark-theme,
-        mat.get-color-from-palette($primary-palette, 300, $exportBackgroundOpacity),
+        #3A5B5C,
         mat.get-color-from-palette($primary-palette, "default"));
     $background-field-color: if($is-dark-theme,
         mat.get-color-from-palette($primary-palette, 300, $exportBackgroundOpacity),
         mat.get-color-from-palette($primary-palette, 600));
     $error-color: mat.get-color-from-palette($warn-palette, "default");
-    app-login, app-validation {
+    app-login, app-signup, app-validation {
         form {
             // @debug $is-dark-theme;
             // @debug mat.get-color-from-palette($primary-palette, 300, $exportBackgroundOpacity);
@@ -36,6 +29,7 @@
             // @debug $background-field-color;
             color: white;
             background-color: $background-color;
+            min-width: 21rem;
             mat-form-field {
                 --mdc-filled-text-field-container-color: #{$background-field-color};
                 --mdc-filled-text-field-caret-color: white;
@@ -64,9 +58,6 @@
 
 @mixin typography($theme) {
     .doc-login-font-size {
-        //font-size: 1.5rem;
-        //font-size: 1rem;
-        //line-height: 3.2rem
         font: mat.get-theme-typography($theme, subtitle-1);
     }
 }

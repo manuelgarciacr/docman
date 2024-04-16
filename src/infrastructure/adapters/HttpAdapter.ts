@@ -11,7 +11,6 @@ import { Injectable, inject } from "@angular/core";
 const httpOptions = {
     headers: new HttpHeaders({
         "Content-Type": "application/json",
-        //Authorization: 'my-auth-token',
     }),
     observe: "body" as const, // 'body' | 'events' | 'response',
     params: {},
@@ -104,18 +103,6 @@ export class HttpAdapter<T, V> implements IHttpAdapter<T, V> {
 delay(3000),
             );
 
-    // post = (url: string, data: T, action?: string) => {
-    //     if (typeof action != "undefined") url += `/${action}`;
-
-    //     return this.http
-    //         .post<resp<V>>(url, data, httpOptions)
-    //         .pipe(
-    //             timeout(10000),
-    //             retry({ count: 2, delay: this.shouldRetry }),
-    //             catchError(this.handleError<V>("http post"))
-    //         );
-    // };
-
     put = (url: string, data: T) => {
         return this.http
             .put<Resp<V>>(url, data, httpOptions)
@@ -147,6 +134,7 @@ delay(3000),
      * @returns Function of type (HttpErrorResponse) => Observable<resp<T>>
      */
     private handleError<V>(operation: string) {
+
         return (error: unknown): Observable<Resp<V>> => {
             let status = 600;
             let message = (error as Error).message ?? "ERROR 600";
@@ -154,8 +142,10 @@ delay(3000),
 
             if (error instanceof HttpErrorResponse) {
                 status = error.status == 200 ? 1 : error.status;
-                message = error.message + ": " + error.error?.message;
-                data = error.error?.data;
+                if (error.error?.message) {
+                    message += ": " + error.error?.message;
+                }
+                data = error.error?.data ?? [];
             } else if (error instanceof TimeoutError) {
                 status = 601;
                 message = error.message + " (601)";

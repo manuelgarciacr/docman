@@ -1,0 +1,47 @@
+<h2 mat-dialog-title>Maintenance of users </h2>
+<mat-dialog-content>
+    <p class="mt-2">Add/remove users for the collection</p>
+    <form [formGroup]="usersForm" color="primary" onsubmit="return false"
+        class="rounded-4 pb-4 px-4 mt-3 mx-auto">
+        <mat-form-field class="w-100">
+            <mat-label>Email address</mat-label>
+            <input type="text" matInput [formControl]="getCtrl('email')" placeholder="" aria-describedby="emailHelp"
+                autocomplete="email" #firstItem>
+            <button type="button" [class.invisible]="!isSet('email')" matSuffix mat-icon-button aria-label="Clear"
+                (click)="set('email', '')" [disabled]="working() != null" class="align-bottom w-3 pb-0 px-0">
+                <mat-icon>backspace</mat-icon>
+            </button>
+            <btn-component type="button" matSuffix [disabled]="!getCtrl('email').valid || working() != null" (click2)="add()" class="my-2 me-2">
+                <mat-icon color="white">add</mat-icon>
+            </btn-component>
+            <div id="emailHelp" class="form-text d-none">
+                We'll never share your email with anyone else. Email address must be unique.
+            </div>
+            <div id="collectionHelp" class="form-text d-none">
+                Name of the collection to display. The collection name must be unique. You can use a format like
+                'your-company/collection-name'.
+            </div>
+        </mat-form-field>
+        <mat-error *ngIf="getError('email')">{{getError('email')}}</mat-error>
+    </form>
+    <mat-list>
+        @for (user of data; let idx = $index; track user) {
+            <mat-list-item>
+                <span class="d-flex" matListItemTitle>
+                    <div class="cls-email me-2">{{ user.email }}</div>
+                    <span class="ms-auto" *ngIf="user.action != ''">( {{ user.action }} )</span>
+                    <btn-component class="ms-3 me-2" type="button"
+                        [disabled]="user.action == 'OWNER'" (click2)="setRemove(idx)">
+                        <mat-icon>{{ user.action == "REMOVE" ? "add" : "remove" }}</mat-icon>
+                    </btn-component>
+                </span>
+                <span matListItemLine>{{ user.name }}</span>
+            </mat-list-item>
+            <mat-divider class="mb-2"></mat-divider>
+        }
+    </mat-list>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>No</button>
+    <button mat-button cdkFocusInitial (click)="actualize()">Ok</button>
+</mat-dialog-actions>

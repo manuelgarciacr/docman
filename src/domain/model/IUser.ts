@@ -6,8 +6,4 @@ export interface IUser {
     firstName: string;
     lastName: string;
     enabled: boolean;
-    // role: string;
-    // createdAt: string;
-    // updatedAt: string;
-    // __v: string
 }

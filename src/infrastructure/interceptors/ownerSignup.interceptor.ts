@@ -2,7 +2,7 @@ import { HttpResponse, type HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpE
 import { inject } from '@angular/core';
 import { CollectionService, UserService } from '@domain';
 import { Resp } from '@infrastructure';
-import { Observable, finalize, map } from 'rxjs';
+import { Observable, catchError, tap } from 'rxjs';
 import { getTokenPayload } from '@utils';
 
 export const ownerSignupInterceptor: HttpInterceptorFn = (
@@ -12,105 +12,109 @@ export const ownerSignupInterceptor: HttpInterceptorFn = (
 
     const userService = inject(UserService);
     const collectionService = inject(CollectionService);
-    let authReq = req;
 
-    if (
-        req.url.endsWith("/accounts/ownerValidation")
-    ) {
+    if (req.url.endsWith("/accounts/ownerSignup")) {
+        return next(req).pipe(
+            tap(event => {
+                try {
+                    if (
+                        event instanceof HttpResponse &&
+                        event.status == 200
+                    ) {
+
+                        const ownerToken = event.headers.get("X-ownctx"); // (body.data ?? [])[0];
+
+                        // If the token is not returned, a validation is already in progress
+                        if (typeof ownerToken != "string") return;
+
+                        const payload = getTokenPayload(ownerToken);
+
+                        userService.setOwnerToken(ownerToken);
+                        userService.setValidationExp(payload.exp);
+                        userService.setValidationIat(payload.iat);
+
+                        // throw "IERROR"
+                    }
+                } catch (err) {
+                    const error = (err as object).toString();
+                    throw {
+                        status: 601,
+                        message: `Interceptor error: ${error.toString()}`,
+                        data: [],
+                    };
+                }
+            }),
+            catchError(err => {
+                // tap error or HttpErrorResponse
+                console.log("Interceptor catchError:", err);
+                throw err;
+            })
+        );
+    }
+
+    if (req.url.endsWith("/accounts/ownerValidation")) {
         const ownerToken = userService.ownerToken();
         const code = userService.validationCode();
-        authReq = req.clone({
-            headers: req.headers.set("Authorization", ownerToken)
-                .set("code", code),
+        const authReq = req.clone({
+            headers: req.headers
+                .set("Authorization", ownerToken)
+                .set("X-Code", code),
         });
+        return next(authReq).pipe(
+            tap(event => {
+                try {
+                    if (event instanceof HttpResponse && event.status == 200) {
+                        const body = event.body as Resp<string[]>;
+                        const userStr = (body.data ?? [])[0];
+                        const collectionStr = (body.data ?? [])[1];
+
+                        if (typeof userStr != "string" || userStr == "")
+                            throw "Invalid user.";
+
+                        if (
+                            typeof collectionStr != "string" ||
+                            collectionStr == ""
+                        )
+                            throw "Invalid collection.";
+
+                        const refreshToken = event.headers.get("X-refctx"); // (body.data ?? [])[0];
+                        const accessToken = event.headers.get("X-ctectx"); // (body.data ?? [])[1];
+
+                        if (
+                            typeof refreshToken != "string" ||
+                            refreshToken == ""
+                        )
+                            throw "Invalid refresh token.";
+
+                        if (typeof accessToken != "string" || accessToken == "")
+                            throw "Invalid access token.";
+
+                        const user = JSON.parse(userStr);
+                        const collection = JSON.parse(collectionStr);
+
+                        userService.setUser(user, true, true); // Clears all data but user and isOwner
+                        userService.setRefreshToken(refreshToken);
+                        userService.setAccessToken(accessToken);
+                        collectionService.setCollection(collection);
+
+                        // throw "IERROR"
+                    }
+                } catch (err) {
+                    const error = (err as object).toString();
+                    throw {
+                        status: 601,
+                        message: `Interceptor error: ${error.toString()}`,
+                        data: [],
+                    };
+                }
+            }),
+            catchError(err => {
+                // tap error or HttpErrorResponse
+                console.log("Interceptor catchError:", err);
+                throw err;
+            })
+        );
     }
-    return next(authReq).pipe(
-        map(event => {
 
-            if (
-                event instanceof HttpResponse &&
-                event.url?.endsWith("/accounts/ownerSignup") &&
-                event.status == 200
-            ) {
-                try {
-                    const body = event.body as Resp<string[]>;
-                    const ownerToken = (body.data ?? [])[0];
-                    const payload = getTokenPayload(ownerToken);
-                    const expiration = payload.exp - payload.iat;
-
-                    userService.setOwnerToken(ownerToken);
-                    userService.setValidationExpiration(expiration);
-
-                } catch (error) {
-                    const newEvent = event.clone({
-                        status: 601,
-                        statusText: "Interceptor error",
-                        body: {
-                            status: 601,
-                            message: "Interceptor error",
-                            data: [],
-                        },
-                    });
-                    console.log("Interceptor error:", error);
-                    return newEvent;
-                }
-            }
-            if (
-                event instanceof HttpResponse &&
-                event.url?.endsWith("/accounts/ownerValidation") &&
-                event.status == 200
-            ) {
-                try {
-                    const body = event.body as Resp<string[]>;
-                    const refreshToken = (body.data ?? [])[0];
-                    const accessToken = (body.data ?? [])[1];
-                    const userStr = (body.data ?? [])[2];
-                    const collectionStr = (body.data ?? [])[3];
-                    const user = JSON.parse(userStr);
-                    const collection = JSON.parse(collectionStr);
-
-                    if (typeof refreshToken != "string" || refreshToken == "")
-                        throw "Invalid refresh token."
-
-                    if (typeof accessToken != "string" || accessToken == "")
-                        throw "Invalid access token.";
-
-                    userService.setRefreshToken(refreshToken);
-                    userService.setAccessToken(accessToken);
-                    userService.setValidationCode("");
-                    userService.removeOwnerToken();
-                    userService.setUser(user);
-                    collectionService.setCollection(collection);
-
-                } catch (error) {
-                    let errorMsg = "";
-
-                    if (typeof error == "string")
-                        errorMsg = error;
-
-                    const newEvent = event.clone({
-                        status: 601,
-                        statusText: `Interceptor error. ${errorMsg}`,
-                        body: {
-                            status: 601,
-                            message: `Interceptor error. ${errorMsg}`,
-                            data: [],
-                        },
-                    });
-                    console.error("Interceptor error:", error);
-                    return newEvent;
-                }
-            }
-            return event;
-        }),
-        /* tap({
-            next: event => {
-                return next(req);
-            },
-            complete: () => {},
-            // Operation failed; error is an HttpErrorResponse
-            error: _error => console.log("ownerSignupInterceptor error:", _error),
-        }), */
-        finalize(() => {})
-    );
+    return next(req);
 };

@@ -1,0 +1,6 @@
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<mat-dialog-content class="mt-2" [innerHTML]="data.text"></mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>No</button>
+    <button mat-button mat-dialog-close cdkFocusInitial (click)="dialogRef.close('OK')">Ok</button>
+</mat-dialog-actions>

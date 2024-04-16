@@ -12,20 +12,6 @@ const canActivateNotUser: CanActivateFn = () =>
         : true;
 
 export const routes: Routes = [
-    // {
-    //     path: "home",
-    //     loadComponent: () =>
-    //         // Lazy load component
-    //         import("@app").then(c => c.HomeComponent),
-    //     data: { label: "Home" },
-    //     canActivate: [authGuard],
-    // },
-    // {
-    //     path: "users",
-    //     loadChildren: () => import("@app").then(c => c.usersRoutes),
-    //     data: { label: "Users" },
-    //     canActivate: [authGuard],
-    // },
     {
         path: "login",
         loadComponent: () => import("@app").then(c => c.LoginComponent),
@@ -39,7 +25,7 @@ export const routes: Routes = [
         canActivate: [canActivateNotUser],
     },
     {
-        path: "validation",
+        path: "validation/:type",
         loadComponent: () => import("@app").then(c => c.ValidationComponent),
         data: { accounting: true },
         canActivate: [canActivateNotUser],

@@ -43,13 +43,11 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild("firstItem") firstItem!: ElementRef;
     private readonly router = inject(Router);
     private readonly repo = inject(AccountRepoService);
-    //private readonly conf = inject(ConfigurationService);
     private readonly formBuilder = inject(FormBuilder);
     private readonly userService = inject(UserService);
     private readonly collectionService = inject(CollectionService);
     private readonly toast = inject(HotToastService);
     private readonly changeDetectionRef = inject(ChangeDetectorRef);
-    //private readonly uniqueEmailValidator = inject(UniqueEmailValidator());
 
     private readonly uniqueEmailValidator = new UniqueEmailValidator(
         this.changeDetectionRef
@@ -57,7 +55,6 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
     private readonly uniqueCollectionValidator = new UniqueCollectionValidator(
         this.changeDetectionRef
     );
-    //private readonly user: IUser | null = null;
     private readonly user = this.userService.user();
     private readonly collection = this.collectionService.collection();
 
@@ -222,7 +219,6 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
             stayLoggedIn,
             users: [],
             roles: [],
-            documents: [],
             enabled: false,
         });
     };
@@ -235,7 +231,6 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
 
         collection!.users = [];
         collection!.roles = [];
-        collection!.documents = [];
 
         this.loading.set(true);
         this.repo
@@ -265,7 +260,9 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
             .subscribe({
                 next: resp => {
                     if (resp.status == 200)
-                        this.router.navigateByUrl("validation"); //, { replaceUrl: true });
+                        this.router.navigateByUrl("validation/signup", {
+                            replaceUrl: true,
+                        }); //, { replaceUrl: true });
                 },
                 error: err => console.error("SIGNUP ERROR", err),
                 complete: () => this.loading.set(false),

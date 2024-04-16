@@ -1,5 +1,3 @@
-import { IDocument } from "@domain";
-
 interface Role {
     value: string;
     viewValue: string;
@@ -18,9 +16,5 @@ export interface ICollection {
     stayLoggedIn: boolean;
     users: string[]; // owner is included
     roles: string[]; // owner, default, etc
-    documents: IDocument[];
     enabled: boolean;
-    // createdAt: string;
-    // updatedAt: string;
-    // __v: string
 }

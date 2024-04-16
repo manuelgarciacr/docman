@@ -10,7 +10,7 @@ export const codeFormControl = (codeElement: Signal<ElementRef>, length = 5): Va
         let value = control.value;
 
         if (value.length == length) {
-            return null
+            return null;
         }
 
         if (!value || value.length < length) {

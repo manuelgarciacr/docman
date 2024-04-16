@@ -1,25 +1,52 @@
 <div>
     <form [formGroup]="validationForm" color="primary" onsubmit="return false"
-        class="was-validated rounded-4 py-4 px-4 mt-3 text-center mx-auto">
+        class="rounded-4 py-4 px-4 mt-3 text-center mx-auto">
+        <div class="text-start">
+            <btn-component type="button" [routerLink]="'/login'" [style.display]="isMobile() ? 'none' : 'inline-block'"
+                class="mb-2">
+                Back
+            </btn-component>
+        </div>
         <countdown #cd [config]="config" (event)="handleEvent($event)"
             class="mx-auto mat-headline-3"/>
         <p class="py-3">Hello. Do not close this window. You have {{ (validationExpiration / 60) | number: '1.0-0' }} minutes to report
-            the code value included in the email you should have received after registration.
+            the code value included in the email you should have received {{ text }}.
             Best regards.</p>
-        <mat-form-field class="mat-headline-4 mx-auto my-3" >
+        <mat-form-field [floatLabel]="'always'" class="mat-headline-4 mx-auto my-3" >
             <mat-label>Validation Code</mat-label>
             <input type="text" matInput [formControl]="getCtrl('code')" placeholder="00000" aria-describedby="codeHelp"
                 autocomplete="off" numbersOnly #firstItem>
             <button type="button" [class.invisible]="!isSet('code')" matSuffix mat-icon-button aria-label="Clear"
-                (click)="set('code', '')" class="w-3 px-0">
+                [disabled]="working() || !validationForm.enabled" (click)="set('code', '')" class="w-3 px-0">
                 <mat-icon>close</mat-icon>
             </button>
-            <div id="codenHelp" class="form-text d-none">
+            <div id="codeHelp" class="form-text d-none">
                 Five digit code. Ten minutes to complete it.
             </div>
         </mat-form-field>
         <mat-error style="height: auto" color="warn" *ngIf="getError('code')">{{getError('code')}}</mat-error>
-        <btn-component type="button"  (click2)="validation()"
+        @if (type == "forgotpassword") {
+            <mat-form-field [floatLabel]="'always'" class="w-100">
+                <mat-label>Password</mat-label>
+                <input [attr.type]="pwdState().type[pwdState().state]" matInput [formControl]="getCtrl('password')"
+                    placeholder="********" aria-describedby="passwordHelp" autocomplete="off">
+                <button type="button" [class.invisible]="!isSet('password')" matSuffix mat-icon-button aria-label="Clear"
+                    [disabled]="working() || !validationForm.enabled" (click)="set('password', '')" class="btn-clear">
+                    <mat-icon>close</mat-icon>
+                </button>
+                <button type="button" matSuffix mat-icon-button
+                    aria-label="pwdState.alt[pwdState.state]" (click)="togglePwdState()"
+                    [disabled]="working() || !validationForm.enabled"  class="btn-pwd">
+                    <mat-icon>{{ pwdState().state == 0 ? 'visibility' : 'visibility_off'}}</mat-icon>
+                </button>
+                <div id="passwordHelp" class="form-text d-none">
+                    Minimum 8 characters and at least one digit, one special
+                    character and one capital letter.
+                </div>
+            </mat-form-field>
+            <mat-error *ngIf="getError('password')">{{getError('password')}}</mat-error>
+        }
+        <btn-component type="button"  [disabled]="disabled()" (click2)="validation()"
             [routerLink]="btnLink()" class="w-100 my-2">
             {{btnLabel()}}
         </btn-component>

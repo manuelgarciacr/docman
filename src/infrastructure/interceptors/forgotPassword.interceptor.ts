@@ -1,33 +1,69 @@
-import {
-    HttpResponse,
-    type HttpInterceptorFn,
-    HttpRequest,
-    HttpHandlerFn,
-    HttpEvent,
-} from "@angular/common/http";
-import { inject } from "@angular/core";
-import { CollectionService, UserService } from "@domain";
-import { Resp } from "@infrastructure";
-import { Observable, catchError, tap } from "rxjs";
+import { HttpResponse, type HttpInterceptorFn, HttpRequest, HttpHandlerFn, HttpEvent } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { CollectionService, UserService } from '@domain';
+import { Resp } from '@infrastructure';
+import { Observable, catchError, tap } from 'rxjs';
+import { getTokenPayload } from '@utils';
 
-export const loginInterceptor: HttpInterceptorFn = (
+export const forgotPasswordInterceptor: HttpInterceptorFn = (
     req: HttpRequest<unknown>,
     next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
+
     const userService = inject(UserService);
     const collectionService = inject(CollectionService);
 
-    if (req.url.endsWith("/accounts/login")) {
-        const ownerToken = userService.ownerToken();
+    if (req.url.endsWith("/accounts/forgotPassword")) {
+        return next(req).pipe(
+            tap(event => {
+                try {
+                    if (
+                        event instanceof HttpResponse &&
+                        event.status == 200
+                    ) {
+                        const forgotPasswordToken =
+                            event.headers.get("X-forpwdvalctx"); // (body.data ?? [])[0];
+
+                        // If the token is not returned, a validation is already in progress
+                        if (typeof forgotPasswordToken != "string") return;
+
+                        const payload = getTokenPayload(forgotPasswordToken);
+
+                        userService.setForgotPasswordToken(forgotPasswordToken);
+                        userService.setValidationExp(payload.exp);
+                        userService.setValidationIat(payload.iat);
+
+                        // throw "IERROR"
+                    }
+                } catch (err) {
+                    const error = (err as object).toString()
+                    throw {
+                        status: 601,
+                        message: `Interceptor error: ${error.toString()}`,
+                        data: [],
+                    }
+                }
+            }),
+            catchError(err => { // tap error or HttpErrorResponse
+                console.log("Interceptor catchError:", err);
+                throw err
+            })
+        )
+    }
+
+    if (req.url.endsWith("/accounts/forgotPasswordValidation")) {
+        const forgotPasswordToken = userService.forgotPasswordToken();
         const code = userService.validationCode();
+        const pwd = userService.validationPwd();
         const authReq = req.clone({
             headers: req.headers
-                .set("Authorization", ownerToken)
-                .set("X-Code", code),
+                .set("Authorization", forgotPasswordToken)
+                .set("X-Code", code)
+                .set("X-pwd", pwd)
         });
         return next(authReq).pipe(
             tap(event => {
-                try { // TODO: Add filter
+                try {
                     if (event instanceof HttpResponse && event.status == 200) {
                         const body = event.body as Resp<string[]>;
                         const userStr = (body.data ?? [])[0];
@@ -61,9 +97,9 @@ export const loginInterceptor: HttpInterceptorFn = (
                         const idx = users.indexOf(user._id ?? "");
                         const isOwner = roles[idx] == "owner";
 
-                        userService.setUser(user, isOwner, true); // Clears all data but user and isOwner
                         userService.setRefreshToken(refreshToken);
                         userService.setAccessToken(accessToken);
+                        userService.setUser(user, isOwner, true); // Clears all data but user and isOwner
                         collectionService.setCollection(collection);
 
                         // throw "IERROR"
@@ -82,16 +118,7 @@ export const loginInterceptor: HttpInterceptorFn = (
                 console.log("Interceptor catchError:", err);
                 throw err;
             })
-        );
-    }
-
-    if (req.url.endsWith("/accounts/logout")) {
-        const refreshToken = userService.refreshToken();
-        const authReq = req.clone({
-            headers: req.headers.set("Authorization", refreshToken)
-        })
-
-        return next(authReq)
+        )
     }
 
     return next(req);

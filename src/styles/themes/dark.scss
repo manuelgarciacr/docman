@@ -3,7 +3,7 @@
 
 // Plus imports for other components in your app.
 @use "../../app/account/login/login-theme" as login;
-@use "../../app/account/signup/signup-theme" as signup;
+// @use "../../app/account/signup/signup-theme" as signup;
 @use "../../infrastructure/components/btn/btn-theme" as btn;
 
 @use "./_docman" as docman;
@@ -29,7 +29,6 @@ $dark-theme: mat.define-dark-theme(
 $background: map.get($dark-theme, background);
 $background-color: map-get($background, background);
 @debug $background-color;// #fafafa
-//
 
 $dark-success: mat.define-palette(mat.$light-green-palette);
 $dark-info: mat.define-palette(mat.$light-blue-palette);
@@ -49,9 +48,10 @@ $dark-variants: (
     @include mat.form-field-color($dark-theme);
     @include mat.checkbox-color($dark-theme);
     @include mat.menu-color($dark-theme);
+    @include mat.dialog-color($dark-theme);
 
-    @include login.theme($dark-theme);
-    @include signup.theme($dark-theme);
+    @include login.theme($dark-theme); //login, signup and validation
+    //@include signup.theme($dark-theme);
     @include btn.theme($dark-theme);
     //background-color: red;
     // @include components.theme(

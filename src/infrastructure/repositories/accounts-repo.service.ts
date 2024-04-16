@@ -15,13 +15,18 @@ type V = string[];
 @Injectable({
     providedIn: "root",
 })
-export class AccountRepoService { // TODO: Rename to AccountsRepoService
+export class AccountRepoService {
+    // TODO: Rename to AccountsRepoService
     private dataSource: IHttpAdapter<T, V> = inject(HttpAdapter<T, V>);
 
     ownerSignup = (body: T) =>
         this.dataSource.post({ url, body, action: "ownerSignup" });
+    forgotPassword = (body: T) =>
+        this.dataSource.post({ url, body, action: "forgotPassword" });
     ownerValidation = () =>
         this.dataSource.post({ url, action: "ownerValidation" });
+    forgotPasswordValidation = () =>
+        this.dataSource.post({ url, action: "forgotPasswordValidation" });
     login = (body: T) => this.dataSource.post({ url, body, action: "login" });
     logout = () => this.dataSource.post({ url, action: "logout" });
     // cleanDB = () => this.dataSource.post(URL, {}, "cleanDB")
