@@ -7,5 +7,7 @@ export * from "./codeFormControl";
 export * from "./codeFormValidator";
 export * from "./NumbersOnly.directive";
 export * from "./tokenPayload";
+export * from "./accessRepo";
+
 
 

@@ -7,6 +7,7 @@ import {
     Injector,
     OnInit,
     ViewChild,
+    computed,
     effect,
     inject,
     runInInjectionContext,
@@ -31,16 +32,10 @@ import {
     IUser,
     ICollection,
 } from "@domain";
-import { ltrimFormControl, trimFormControl } from "@utils";
+import { accessRepo, ltrimFormControl, trimFormControl } from "@utils";
 import { AccountRepoService, BtnComponent } from "@infrastructure";
 import { Router } from "@angular/router";
 import { HotToastService } from "@ngneat/hot-toast";
-import { tap } from "rxjs";
-
-const DISMISS = {
-    autoClose: false,
-    dismissible: true,
-};
 
 @Component({
     selector: "app-login",
@@ -76,8 +71,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private readonly collection =
         this.collectionService.collection() ?? <ICollection>{};
 
-    protected readonly loading = signal(false);
-    protected readonly working = signal<ReturnType<typeof setTimeout> | null>(null);
+    protected readonly working = signal<ReturnType<typeof setTimeout> | null>(
+        null
+    );
+    protected readonly loading = computed(() => this.working() != null);
+
     protected loginForm: FormGroup = this.formBuilder.group({});
     protected pwdState = {
         type: ["password", "text"],
@@ -109,7 +107,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
         runInInjectionContext(this.injector, () => {
             effect(() => {
-                if (this.loading()) this.loginForm.disable();
+                if (this.working()) this.loginForm.disable();
                 else this.loginForm.enable();
             });
         });
@@ -183,8 +181,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.collectionService.setCollection(this.collection);
     };
 
-    protected login = () => {
-        this.setData();
+    private getData = () => {
         const _user = this.userService.user();
         const email = _user?.email ?? "";
         const password = _user?.password ?? "";
@@ -204,107 +201,44 @@ export class LoginComponent implements OnInit, AfterViewInit {
             users: [],
             roles: [],
         };
-        const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
 
-        this.loading.set(true);
-        this.repo
-            .login({ user, collection })
-            .pipe(
-                this.toast.observe({
-                    loading: { content: "Logging in" },
-                    success: {
-                        content: "Success",
-                        style: { display: "none" },
-                    },
-                    error: {
-                        content: err => `Error: ${err.toString()}`,
-                    },
-                }),
-                tap(resp => {
-                    const err = briefError(resp.message.toString());
-                    if (resp.status == 200) {
-                        this.toast.success("Successful login");
-                    } else {
-                        this.toast.error(err, DISMISS);
-                    }
-                })
-            )
-            .subscribe({
-                next: resp => {
-                    if (resp.status != 200) {
-                        console.error("LOGIN ERROR NEXT", resp);
-                        return;
-                    }
-                    this.router.navigateByUrl("test", { replaceUrl: true });
-                },
-                error: err => console.error("LOGIN ERROR", err),
-                complete: () => this.loading.set(false),
-            });
+        return {user, collection}
+    }
+
+    protected login = async () => {
+        if (this.working()) return;
+
+        this.setData();
+        const userColl = this.getData();
+
+        const obs$ = this.repo.login(userColl);
+
+        await accessRepo(`Logging in`, obs$, this.working, this.toast);
+        this.toast.success("Successful login.");
+        this.router.navigateByUrl("test", { replaceUrl: true });
     };
 
-    protected forgotPassword = () => {
+    protected forgotPassword = async () => {
         if (this.working()) return;
 
         this.setData();
 
-        const email = this.userService.user()?.email ?? "";
-        const name = this.collectionService.collection()?.name ?? "";
-        const user: IUser = {
-            email,
-            password: "",
-            firstName: "",
-            lastName: "",
-            enabled: false,
-        };
-        const collection: ICollection = {
-            name,
-            description: "",
-            enabled: false,
-            stayLoggedIn: false,
-            users: [],
-            roles: [],
-        };
-        const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
+        const { user, collection } = this.getData();
 
-        const timeout = setTimeout(() => {
-            if (!this.working()) return;
+        user.password = "";
 
-            this.toast.loading(`Validating data in progress`, {
-                autoClose: false,
-                dismissible: true,
-                id: "workingToast",
-            });
-        }, 500);
+        const obs$ = this.repo.forgotPassword({ user, collection })
 
-        this.working.set(timeout);
-
-        this.repo
-            .forgotPassword({ user, collection })
-            .pipe(
-                tap({
-                    next: resp => {
-                        const err = briefError(resp.message.toString());
-
-                        if (resp.status == 200) {
-                            this.toast.success("Successful validation.");
-                            this.router.navigateByUrl(
-                                "validation/forgotpassword",
-                                { replaceUrl: true }
-                            );
-                        } else {
-                            this.toast.error(err, DISMISS);
-                        }
-                    },
-                    // Operation failed; error is an HttpErrorResponse
-                    error: _error => console.log("Password validation error:", _error),
-                    complete: () => {
-                        clearTimeout(this.working() ?? undefined);
-                        this.toast.close("workingToast");
-                        this.working.set(null);
-                        this.loading.set(false);
-                    },
-                })
-            ).subscribe()
+        await accessRepo(
+            `Validating data in progress`,
+            obs$,
+            this.working,
+            this.toast
+        );
+        this.toast.success("Successful validation.");
+        this.router.navigateByUrl("validation/forgotpassword", {
+            replaceUrl: true,
+        });
     };
 
     // Form Control helpers

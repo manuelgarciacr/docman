@@ -32,11 +32,12 @@
             )!important;
             color: $color!important;
             &.mat-mdc-raised-button[disabled] {
-                background: linear-gradient(
-                    90deg,
-                    gray 68%,
-                    lightgray 100%
-                )!important;
+                opacity: .3;
+                // background: linear-gradient(
+                //     90deg,
+                //     gray 68%,
+                //     lightgray 100%
+                // )!important;
                 cursor: default!important;
             }
         }

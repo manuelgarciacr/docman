@@ -6,18 +6,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { AccountRepoService, BtnComponent } from '@infrastructure';
-import { NumbersOnlyDirective, codeFormControl, codeFormValidator, passwordValidator } from '@utils';
+import { NumbersOnlyDirective, accessRepo, codeFormControl, codeFormValidator, passwordValidator } from '@utils';
 import { CountdownComponent, CountdownEvent, CountdownModule } from 'ngx-countdown';
 import { HotToastService } from "@ngneat/hot-toast";
-import { tap } from 'rxjs';
 import { UserService } from '@domain';
 import { Router } from '@angular/router';
 import { MediaMatcher } from '@angular/cdk/layout';
-
-const DISMISS = {
-    autoClose: false,
-    dismissible: true,
-};
 
 @Component({
     selector: "app-validation",
@@ -188,54 +182,28 @@ export class ValidationComponent implements OnInit, AfterViewInit {
         }
     };
 
-    protected validation = () => {
+    protected validation = async () => {
         if (this.working()) return;
         if (this.btnLabel() == "Log in") return;
-
-        const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
 
         this.userService.setValidationCode(this.getValue("code"));
         this.userService.setValidationPwd(this.getValue("password"));
 
-        const timeout = setTimeout(() => {
-            if (!this.working()) return;
+        const obs$ =
+            this.type == "forgotpassword"
+                ? this.repo.forgotPasswordValidation()
+                : this.repo.ownerValidation();
 
-            this.toast.loading(`Validating data in progress`, {
-                autoClose: false,
-                dismissible: true,
-                id: "workingToast",
-            });
-        }, 500);
-
-        this.working.set(timeout);
-
-        (this.type == "forgotpassword"
-            ? this.repo.forgotPasswordValidation()
-            : this.repo.ownerValidation()
-        )
-            .pipe(
-                tap({
-                    next: resp => {
-                        if (resp.status == 200) {
-                            this.toast.success("Successful validation.");
-                            this.router.navigateByUrl("test", {
-                                replaceUrl: true,
-                            });
-                        } else {
-                            const err = briefError(resp.message.toString());
-                            this.toast.error(err, DISMISS);
-                        }
-                    },
-                    // Operation failed; error is an HttpErrorResponse
-                    error: _error => console.log("Validation error:", _error),
-                    complete: () => {
-                        clearTimeout(this.working() ?? undefined);
-                        this.toast.close("workingToast");
-                        this.working.set(null);
-                    },
-                })
-            )
-            .subscribe();
+        await accessRepo(
+            `Validating data in progress`,
+            obs$,
+            this.working,
+            this.toast
+        );
+        this.toast.success("Successful validation.");
+        this.router.navigateByUrl("test", {
+            replaceUrl: true,
+        });
     };
 
     // Form Control helpers

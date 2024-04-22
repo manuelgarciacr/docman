@@ -6,7 +6,7 @@
 
 $light-primary: mat.define-palette(docman.$palette);
 $light-accent: mat.define-palette(docman.$palette, A200, A100, A400);
-$light-warn: mat.define-palette(mat.$deep-orange-palette);
+$light-warn: mat.define-palette(mat.$red-palette);
 
 $light-theme: mat.define-light-theme(
     (

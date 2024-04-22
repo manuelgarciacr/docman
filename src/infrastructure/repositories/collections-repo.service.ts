@@ -12,7 +12,7 @@ type T = {
     usersActualization?: UsersActualization
 };
 
-type V = ICollection[];
+type V = ICollection[] | UsersActualization;
 
 @Injectable({
     providedIn: "root",
@@ -23,8 +23,12 @@ export class CollectionsRepoService {
     getCollections = (arg?: string | Params, action?: string) =>
         this.dataSource.get(url, arg, action);
 
-    actualizeUsers = (usersActualization: UsersActualization) =>
-        this.dataSource.post({url, body: {usersActualization}, action: "actualizeUsers"});
+    actualizeUsers = (collectionId: string, usersActualization: UsersActualization) =>
+        this.dataSource.post({url, body: {usersActualization},
+            action: "actualizeUsers", arg: collectionId});
+
+    getUsers = (collectionId: string) =>
+        this.dataSource.get(url, collectionId, "getUsers");
 
     // putCollection = (collection: ICollection) => this.dataSource.put(URL, collection);
     // addCollection = (collection: ICollection, action?: string) => this.dataSource.post(URL, collection, action);

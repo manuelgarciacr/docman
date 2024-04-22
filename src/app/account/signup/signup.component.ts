@@ -1,6 +1,6 @@
 import { MediaMatcher } from '@angular/cdk/layout';
 import { NgIf } from '@angular/common';
-import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -11,13 +11,8 @@ import { NavigationStart, Router } from '@angular/router';
 import { CollectionService, UserService } from '@domain';
 import { AccountRepoService, BtnComponent } from '@infrastructure';
 import { HotToastService } from '@ngneat/hot-toast';
-import { UniqueCollectionValidator, UniqueEmailValidator, passwordValidator, ltrimFormControl, trimFormControl } from '@utils';
-import { Subscription, tap } from 'rxjs';
-
-const DISMISS = {
-    autoClose: false,
-    dismissible: true,
-};
+import { UniqueCollectionValidator, UniqueEmailValidator, passwordValidator, ltrimFormControl, trimFormControl, accessRepo } from '@utils';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: "app-signup",
@@ -28,11 +23,9 @@ const DISMISS = {
         ReactiveFormsModule,
         MatIconModule,
         MatButtonModule,
-        // MatSelectModule,
         MatInputModule,
         MatFormFieldModule,
         MatCheckboxModule,
-        //MatDialogModule,
         BtnComponent,
     ],
     templateUrl: "./signup.component.html",
@@ -61,7 +54,10 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
     private navigationSubscription?: Subscription;
     private media = inject(MediaMatcher);
     private matcher = this.media.matchMedia("(max-width: 600px)");
-    protected readonly loading = signal(false);
+    protected readonly working = signal<ReturnType<typeof setTimeout> | null>(
+        null
+    );
+    protected readonly loading = computed(() => this.working() != null);
     protected isMobile = signal(this.matcher.matches);
     protected matcherListener = (e: MediaQueryListEvent) =>
         this.isMobile.set(e.matches ? true : false);
@@ -75,7 +71,6 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
         ],
         state: 0,
     };
-    protected formDisabled = false;
 
     ngOnInit(): void {
         const formGroup = {
@@ -223,50 +218,20 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     };
 
-    protected signup = () => {
+    protected signup = async () => {
+        if (this.working()) return;
+
         this.setData();
         const user = this.userService.user()!;
         const collection = this.collectionService.collection()!;
-        const briefError = (err: string) => (err.split(":").pop() ?? "").trim();
 
-        collection!.users = [];
-        collection!.roles = [];
+        const obs$ = this.repo.ownerSignup({ user, collection });
 
-        this.loading.set(true);
-        this.repo
-            .ownerSignup({ user, collection })
-            .pipe(
-                this.toast.observe({
-                    loading: { content: "Registering" },
-                    success: {
-                        content: "Success",
-                        style: { display: "none" },
-                    },
-                    error: {
-                        content: err => `Error: ${err.toString()}`,
-                    },
-                }),
-                tap(resp => {
-                    const err = briefError(resp.message.toString());
-                    if (resp.status == 200) {
-                        this.toast.success(
-                            "Successful registration. Pending validation."
-                        );
-                    } else {
-                        this.toast.error(err, DISMISS);
-                    }
-                })
-            )
-            .subscribe({
-                next: resp => {
-                    if (resp.status == 200)
-                        this.router.navigateByUrl("validation/signup", {
-                            replaceUrl: true,
-                        }); //, { replaceUrl: true });
-                },
-                error: err => console.error("SIGNUP ERROR", err),
-                complete: () => this.loading.set(false),
-            });
+        await accessRepo(`Registering`, obs$, this.working, this.toast);
+        this.toast.success("Successful registration. Pending validation.");
+        this.router.navigateByUrl("validation/signup", {
+            replaceUrl: true,
+        });
     };
 
     private getValue = (name: string) => this.signupForm.get(name)?.value;

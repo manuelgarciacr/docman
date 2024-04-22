@@ -76,8 +76,8 @@ export class HttpAdapter<T, V> implements IHttpAdapter<T, V> {
     post = (data: {
         url: string;
         body?: T;
-        arg?: string | Params;
         action?: string;
+        arg?: string | Params;
     }): Observable<Resp<V>> => {
         const { body, arg, action } = data;
         let url = data.url;
@@ -100,7 +100,7 @@ export class HttpAdapter<T, V> implements IHttpAdapter<T, V> {
                 timeout(10000),
                 retry({ count: 2, delay: this.shouldRetry }),
                 catchError(this.handleError<V>("http post")),
-delay(3000),
+                delay(3000)
             );
 
     put = (url: string, data: T) => {
@@ -134,8 +134,8 @@ delay(3000),
      * @returns Function of type (HttpErrorResponse) => Observable<resp<T>>
      */
     private handleError<V>(operation: string) {
-
         return (error: unknown): Observable<Resp<V>> => {
+            console.log("ERRORHAND", error, error instanceof ProgressEvent);
             let status = 600;
             let message = (error as Error).message ?? "ERROR 600";
             let data;
@@ -146,12 +146,15 @@ delay(3000),
                     message += ": " + error.error?.message;
                 }
                 data = error.error?.data ?? [];
+                if (status == 0) {
+                    status = 601;
+                    message = message += ":Conection error (0)";
+                }
             } else if (error instanceof TimeoutError) {
                 status = 601;
-                message = error.message + " (601)";
-            }
-
-            console.error(`${operation} failed: ${message}`, error);
+                message = error.message + " (601): Connection error (timeout)";
+            } else if (error instanceof ProgressEvent)
+                console.error(`${operation} failed: ${message}`, error);
 
             // Let the app keep running by returning a safe result.
             return of({ status, message, data });
@@ -159,11 +162,16 @@ delay(3000),
     }
 
     // A custom method to check should retry a request or not
-    // Retry when the status code is not 404, 601 nor timeout
+    // Retry when the status code is not 0, 404, 401, 601 nor timeout
     private shouldRetry(error: HttpErrorResponse) {
-        if (error.status != 404
-            && !(error instanceof TimeoutError)
-            && error.status != 601) {
+        console.log("RETRY", error);
+        if (
+            error.status != 0 &&
+            error.status != 404 &&
+            error.status != 401 &&
+            !(error instanceof TimeoutError) &&
+            error.status != 601
+        ) {
             return timer(1000); // Adding a timer from RxJS to return observable<0> to delay param.
         }
 

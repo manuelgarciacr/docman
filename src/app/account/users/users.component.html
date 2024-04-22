@@ -2,7 +2,7 @@
 <mat-dialog-content>
     <p class="mt-2">Add/remove users for the collection</p>
     <form [formGroup]="usersForm" color="primary" onsubmit="return false"
-        class="rounded-4 pb-4 px-4 mt-3 mx-auto">
+        class="was-validated rounded-4 pb-4 px-4 mt-3 mx-auto">
         <mat-form-field class="w-100">
             <mat-label>Email address</mat-label>
             <input type="text" matInput [formControl]="getCtrl('email')" placeholder="" aria-describedby="emailHelp"
@@ -23,23 +23,23 @@
             </div>
         </mat-form-field>
         <mat-error *ngIf="getError('email')">{{getError('email')}}</mat-error>
+        <mat-list>
+            @for (user of data; let idx = $index; track user) {
+                <mat-list-item>
+                    <span class="d-flex" matListItemTitle>
+                        <div class="cls-email me-2">{{ user.email }}</div>
+                        <span class="ms-auto" *ngIf="user.action != ''">( {{ user.action }} )</span>
+                        <btn-component class="ms-3 me-2" type="button"
+                            [disabled]="user.action == 'OWNER'" (click2)="setRemove(idx)">
+                            <mat-icon>{{ user.action == "REMOVE" || user.action == "REJECTED" ? "add" : "remove" }}</mat-icon>
+                        </btn-component>
+                    </span>
+                    <span matListItemLine>{{ user.name }}</span>
+                </mat-list-item>
+                <mat-divider class="mb-2"></mat-divider>
+            }
+        </mat-list>
     </form>
-    <mat-list>
-        @for (user of data; let idx = $index; track user) {
-            <mat-list-item>
-                <span class="d-flex" matListItemTitle>
-                    <div class="cls-email me-2">{{ user.email }}</div>
-                    <span class="ms-auto" *ngIf="user.action != ''">( {{ user.action }} )</span>
-                    <btn-component class="ms-3 me-2" type="button"
-                        [disabled]="user.action == 'OWNER'" (click2)="setRemove(idx)">
-                        <mat-icon>{{ user.action == "REMOVE" ? "add" : "remove" }}</mat-icon>
-                    </btn-component>
-                </span>
-                <span matListItemLine>{{ user.name }}</span>
-            </mat-list-item>
-            <mat-divider class="mb-2"></mat-divider>
-        }
-    </mat-list>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>No</button>

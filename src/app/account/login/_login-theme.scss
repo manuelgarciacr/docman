@@ -14,41 +14,59 @@
     //     mat.get-color-from-palette($primary-palette, "default-contrast"));
 
     $background-color: if($is-dark-theme,
-        #3A5B5C,
-        mat.get-color-from-palette($primary-palette, "default"));
+        mat.get-color-from-palette($primary-palette, 800),
+        mat.get-color-from-palette($primary-palette, 300));
     $background-field-color: if($is-dark-theme,
-        mat.get-color-from-palette($primary-palette, 300, $exportBackgroundOpacity),
-        mat.get-color-from-palette($primary-palette, 600));
+        mat.get-color-from-palette($primary-palette, 700),
+        mat.get-color-from-palette($primary-palette, 200));
+    $background-field-disabled-color: if($is-dark-theme,
+        mat.get-color-from-palette($primary-palette, 900),
+        mat.get-color-from-palette($primary-palette, 400));
+    $field-color: if($is-dark-theme,
+        white,
+        black);
     $error-color: mat.get-color-from-palette($warn-palette, "default");
-    app-login, app-signup, app-validation {
-        form {
+    app-login, app-signup, app-validation, app-users, dlg {
+        --mat-icon-button-hover-state-layer-opacity: .2;
+        form, mat-dialog-content, mat-dialog-actions {
             // @debug $is-dark-theme;
             // @debug mat.get-color-from-palette($primary-palette, 300, $exportBackgroundOpacity);
             // @debug mat.get-color-from-palette($primary-palette, 100);
             // @debug $background-color;
             // @debug $background-field-color;
-            color: white;
+            color: $field-color;
             background-color: $background-color;
             min-width: 21rem;
             mat-form-field {
+                :-webkit-autofill {
+                    filter:none; /* needed for firefox! */
+                    box-shadow: 0 0 0 100px #{$background-field-color} inset;
+                    color: #{$field-color}!important;
+                    -webkit-text-fill-color: #{$field-color}!important;
+                }
                 --mdc-filled-text-field-container-color: #{$background-field-color};
-                --mdc-filled-text-field-caret-color: white;
-                --mdc-filled-text-field-label-text-color: white;
-                --mdc-filled-text-field-focus-label-text-color: white;
-                --mdc-filled-text-field-active-indicator-color: white;
-                --mdc-filled-text-field-focus-active-indicator-color: white;
-                --mdc-filled-text-field-hover-active-indicator-color: white;
-                --mdc-filled-text-field-input-text-color: white;
+                --mdc-filled-text-field-caret-color: #{$field-color};
+                --mdc-filled-text-field-label-text-color: #{$field-color};
+                --mdc-filled-text-field-focus-label-text-color: #{$field-color};
+                --mdc-filled-text-field-active-indicator-color: #{$field-color};
+                --mdc-filled-text-field-focus-active-indicator-color: #{$field-color};
+                --mdc-filled-text-field-hover-active-indicator-color: #{$field-color};
+                --mdc-filled-text-field-input-text-color: #{$field-color};
+                --mdc-filled-text-field-disabled-container-color: #{$background-field-disabled-color};
                 .mat-mdc-form-field-bottom-align::before {
                     height: 1.5rem!important;
                 }
             }
             mat-checkbox {
-                --mdc-checkbox-unselected-icon-color: white;
-                --mdc-checkbox-unselected-focus-icon-color: white;
-                --mdc-checkbox-unselected-hover-icon-color: white;
-                --mdc-theme-text-primary-on-background: white;
+                --mdc-checkbox-unselected-icon-color: #{$field-color};
+                --mdc-checkbox-unselected-focus-icon-color: #{$field-color};
+                --mdc-checkbox-unselected-hover-icon-color: #{$field-color};
+                --mdc-theme-text-primary-on-background: #{$field-color};
             }
+        }
+        mat-dialog-actions {
+            color: $field-color;
+            background-color: mat.get-color-from-palette($primary-palette, default),;
         }
         mat-error {
             color: $error-color!important;

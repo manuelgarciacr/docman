@@ -23,6 +23,7 @@
 
 @include mat.core-theme(light.$light-theme);
 @include mat.button-theme(light.$light-theme);
+@include mat.icon-button-theme(light.$light-theme);
 @include mat.toolbar-theme(light.$light-theme);
 @include mat.tabs-theme(light.$light-theme);
 @include mat.input-theme(light.$light-theme);
