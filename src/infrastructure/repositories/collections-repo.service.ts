@@ -5,27 +5,35 @@ import { ICollection } from "@domain";
 
 const url = `${environment.apiUrl}/collections`;
 
-type UsersActualization = {email: string, name: string, action: string}[];
+type UsersActualization = { email: string; name: string; action: string }[];
+type Actualization = {
+    stayLoggedIn?: boolean,
+    twoFactor?: boolean,
+    users: UsersActualization
+};
 
 type T = {
     collection?: ICollection;
-    usersActualization?: UsersActualization
+    actualization?: Actualization
 };
 
-type V = ICollection[] | UsersActualization;
+type V = ICollection[] | Actualization;
 
 @Injectable({
     providedIn: "root",
 })
 export class CollectionsRepoService {
+    logout() {
+        throw new Error('Method not implemented.');
+    }
     private dataSource: IHttpAdapter<T, V> = inject(HttpAdapter<T, V>);
 
     getCollections = (arg?: string | Params, action?: string) =>
         this.dataSource.get(url, arg, action);
 
-    actualizeUsers = (collectionId: string, usersActualization: UsersActualization) =>
-        this.dataSource.post({url, body: {usersActualization},
-            action: "actualizeUsers", arg: collectionId});
+    actualization = (collectionId: string, actualization: Actualization) =>
+        this.dataSource.post({url, body: {actualization},
+            action: "actualization", arg: collectionId});
 
     getUsers = (collectionId: string) =>
         this.dataSource.get(url, collectionId, "getUsers");

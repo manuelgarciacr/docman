@@ -40,9 +40,7 @@ export const accessRepo = async (
                 const err = briefError(error.toString());
                 //const err = this.briefError(error);
 
-                if (err == "refresh jwt expired")
-                    toast.error("EXPIRED SESSION", DISMISS);
-                else
+                if (err != "refresh jwt expired" && err != "Token error")
                     toast.error(err, DISMISS);
 
                 throw err;
@@ -56,3 +54,17 @@ export const accessRepo = async (
     );
 };
 
+export const isTokenError = (err: string) => {
+    return typeof err == "string" &&
+            (
+                err == "refresh jwt expired" ||
+                err == "Token error"
+            )
+}
+
+export const isExpiredSession = (err: string) => {
+    return (
+        typeof err == "string" &&
+        err == "refresh jwt expired"
+    );
+};

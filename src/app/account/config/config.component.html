@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Account management </h2>
+<mat-dialog-content>
+    <p class="mt-2">Change options for the collection</p>
+    <form [formGroup]="form" color="primary" onsubmit="return false"
+        class="was-validated rounded-4 pb-4 px-4 mt-3 mx-auto">
+        <mat-checkbox formControlName="stayLoggedIn">
+            Stay logged in
+        </mat-checkbox>
+        <mat-checkbox formControlName="twoFactor">
+            Two factor authentication
+        </mat-checkbox>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>No</button>
+    <button mat-button cdkFocusInitial (click)="actualize()">Ok</button>
+</mat-dialog-actions>

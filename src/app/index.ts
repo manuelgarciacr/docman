@@ -2,6 +2,7 @@ export * from "./account/signup/signup.component";
 export * from "./account/login/login.component";
 export * from "./account/validation/validation.component";
 export * from "./account/users/users.component";
+export * from "./account/config/config.component";
 export * from "./e404/e404.component";
 export * from "./test/test.component";
 export * from "./app.component";

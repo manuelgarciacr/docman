@@ -23,10 +23,23 @@
             </div>
         </mat-form-field>
         <mat-error *ngIf="getError('email')">{{getError('email')}}</mat-error>
+        <mat-divider class="mb-2"></mat-divider>
         <mat-list>
             @for (user of data; let idx = $index; track user) {
                 <mat-list-item>
-                    <span class="d-flex" matListItemTitle>
+                    <mat-card class="mat-elevation-z8 mb-2" appearance="outlined">
+                        <mat-card-header>
+                            <mat-card-title class="d-flex">
+                                <div class="cls-email me-2">{{ user.email }}</div>
+                                <span class="ms-auto" *ngIf="user.action != ''">( {{ user.action }} )</span>
+                                <btn-component class="ms-3" type="button" [disabled]="user.action == 'OWNER'" (click2)="setRemove(idx)">
+                                    <mat-icon>{{ user.action == "REMOVE" || user.action == "REJECTED" ? "add" : "remove" }}</mat-icon>
+                                </btn-component>
+                            </mat-card-title>
+                            <mat-card-subtitle>{{ user.name }}</mat-card-subtitle>
+                        </mat-card-header>
+                    </mat-card>
+                    <!-- <span class="d-flex" matListItemTitle>
                         <div class="cls-email me-2">{{ user.email }}</div>
                         <span class="ms-auto" *ngIf="user.action != ''">( {{ user.action }} )</span>
                         <btn-component class="ms-3 me-2" type="button"
@@ -34,9 +47,9 @@
                             <mat-icon>{{ user.action == "REMOVE" || user.action == "REJECTED" ? "add" : "remove" }}</mat-icon>
                         </btn-component>
                     </span>
-                    <span matListItemLine>{{ user.name }}</span>
+                    <span matListItemLine>{{ user.name }}</span> -->
                 </mat-list-item>
-                <mat-divider class="mb-2"></mat-divider>
+                <!-- <mat-divider class="mb-2"></mat-divider> -->
             }
         </mat-list>
     </form>

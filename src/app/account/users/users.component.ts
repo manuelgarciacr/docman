@@ -12,6 +12,7 @@ import { accessRepo, trimFormControl } from '@utils';
 import { HotToastService } from '@ngneat/hot-toast';
 import { NgIf } from '@angular/common';
 import { CollectionService } from '@domain';
+import { MatCardModule } from '@angular/material/card';
 
 type actualization = { email: string; userId: string; name: string; action: string }
 
@@ -36,6 +37,7 @@ type actualization = { email: string; userId: string; name: string; action: stri
         MatListModule,
         MatIconModule,
         MatDividerModule,
+        MatCardModule
     ],
 })
 export class UsersComponent implements OnInit {
@@ -123,7 +125,7 @@ export class UsersComponent implements OnInit {
             this.working,
             this.toast
         );
-        this.toast.success("Successful validation.");
+        //this.toast.success("Successful validation.");
 
         const action = "NEW";
         let name = "";
@@ -156,7 +158,7 @@ export class UsersComponent implements OnInit {
         else
             this.data[idx].action = action;
 
-        this.toast.success("Successful removal.");
+        //this.toast.success("Successful removal.");
     };
 
     protected actualize = async () => {
@@ -171,31 +173,26 @@ export class UsersComponent implements OnInit {
 
         if (usersActualization.length == 0) return;
 
-        try {
-            const obs$ = this.collectionsRepo.actualizeUsers(
-                this.collection?._id ?? "",
-                usersActualization
-            );
-            await accessRepo(
-                `Users update in progress`,
-                obs$,
-                this.working,
-                this.toast
-            );
-            this.toast.success("Successful update.");
-            this.dialogRef.close();
-        } catch (err) {
-            //TODO: SAVE DATA AND LOCATION BEFORE LOGING OUT.
-            //TODO: Check on session error/expiration
-            if (
-                typeof err == "string" &&
-                (
-                    err == "refresh jwt expired" ||
-                    (err.includes("Invalid") && err.includes("token"))
-                )
-            )
-                this.dialogRef.close("logout");
-        }
+        const obs$ = this.collectionsRepo.actualization(
+            this.collection?._id ?? "",
+            {users: usersActualization}
+        );
+
+        await accessRepo(
+            `Updating`,
+            obs$,
+            this.working,
+            this.toast
+        ).then(() => this.dialogRef.close("OK"))
+        // .then(() => {
+        //     this.toast.success("Successful update.");
+        //     this.dialogRef.close()
+        // })
+        // .catch(err =>
+        //     isExpiredSession(err) ? this.dialogRef.close("EXPIRED SESSION")
+        //     :isTokenError(err) ? this.dialogRef.close(err)
+        //     : null
+        // )
     };
 
     // Form Control helpers

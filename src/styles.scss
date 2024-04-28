@@ -17,7 +17,7 @@
 @use "../src/styles/typography/config" as typography;
 
 @use "SASS:map";
-@use '@ngneat/hot-toast/src/styles/styles.scss';
+@use '../node_modules/@ngneat/hot-toast/src/styles/styles.scss';
 
 @include mat.core();
 
@@ -31,6 +31,7 @@
 @include mat.checkbox-theme(light.$light-theme);
 @include mat.menu-theme(light.$light-theme);
 @include mat.dialog-theme(light.$light-theme);
+@include mat.card-theme(light.$light-theme);
 
 @include login.theme(light.$light-theme);
 @include btn.theme(light.$light-theme);
@@ -131,12 +132,12 @@ $primary-palette: map.get($color-config, "primary");
     }
 }
 
-app-users, dlg {
-    h2 {
-        background-color: var(--background-color);
-        color: white!important;
-        margin-bottom: 0rem!important;
-        padding-bottom: 1rem!important;
-        --background-color: #{mat.get-color-from-palette($primary-palette, "default")};
-    }
-}
+// app-users, dlg {
+//     h2 {
+//         background-color: var(--background-color);
+//         color: white!important;
+//         margin-bottom: 0rem!important;
+//         padding-bottom: 1rem!important;
+//         --background-color: #{mat.get-color-from-palette($primary-palette, "default")};
+//     }
+// }

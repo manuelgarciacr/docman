@@ -8,8 +8,9 @@ import { NgIf } from '@angular/common';
 import { HotToastService } from '@ngneat/hot-toast';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { UsersComponent } from '@app';
-import { accessRepo } from '@utils';
+import { ConfigComponent, UsersComponent } from '@app';
+import { accessRepo, isExpiredSession, isTokenError } from '@utils';
+import { ComponentType } from '@angular/cdk/overlay';
 
 @Component({
     selector: "user-menu",
@@ -51,27 +52,28 @@ export class UserMenuComponent {
         if (this.working()) return;
 
         const obs$ = this.collectionsRepo.getUsers(this.collectionId);
-        const data = await accessRepo(
+
+        await accessRepo(
             `Getting data in progress`,
             obs$,
             this.working,
             this.toast
+        )
+        .then(data =>
+            this.openDialog(UsersComponent, data, ev => {
+                console.log("EVEV", ev);
+                if (ev == "OK") this.toast.success("Successful update.");
+            })
+        )
+        // .catch(err =>
+        //     isExpiredSession(err) ? this.dialogRef.close("EXPIRED SESSION")
+        //     :isTokenError(err) ? this.dialogRef.close(err)
+        //     : null
+        // )
+        // }))
+        .catch(err =>
+            this.tokenError(err as string)
         );
-
-        console.log("DATA", data);
-        const ref = this.dialog.open(UsersComponent, {
-            maxWidth: "30rem",
-            enterAnimationDuration: "1000ms",
-            exitAnimationDuration: "1000ms",
-            restoreFocus: false,
-            backdropClass: "",
-            panelClass: ["w-75", "w-sm-25"],
-            data,
-        });
-        ref.afterClosed().subscribe(ev => {
-            console.log("EVENTDLG", ev);
-            if (ev == "logout") this.logout();
-        });
     };
 
     protected removeAccount = () => {
@@ -81,40 +83,71 @@ export class UserMenuComponent {
             Your documents will only be kept for a minimum of two months. \
             You can contact us at 'accounts@docman,com'";
         const title = "Delete account";
-        const ref = this.dialog.open(DlgComponent, {
-            maxWidth: "30rem",
-            enterAnimationDuration: "1000ms",
-            exitAnimationDuration: "1000ms",
-            restoreFocus: false,
-            backdropClass: "pepe",
-            panelClass: ["w-75", "w-sm-25"],
-            data: { title, text },
-        });
-        ref.afterClosed().subscribe(ev => {
-            console.log("EVENTDLG", ev);
-        });
+
+        this.openDialog(DlgComponent, { title, text }, ev =>
+            console.log("RA", ev)
+        );
     };
 
-    protected logout = async () => {
+    protected accountManagement = async () => {
         if (this.working()) return;
 
         try {
-            const obs$ = this.repo.logout();
-            await accessRepo(
-                `Logout in progress`,
-                obs$,
-                this.working,
-                this.toast
-            );
-            this.toast.success("Successful logout.");
+            this.openDialog(ConfigComponent, {}, ev => {
+                console.log("EVEV", ev);
+                if (ev == "OK") this.toast.success("Successful update.");
+            });
+        } catch (err) {
+            this.tokenError(err as string)
         }
-        finally {
+    };
+
+    protected logout = async (ev: string) => {
+        if (this.working()) return;
+
+        ev == "" ? ev : (ev += ". ");
+        const obs$ = this.repo.logout();
+
+        await accessRepo(
+            `${ev}Logout in progress`,
+            obs$,
+            this.working,
+            this.toast
+        )
+        .then(() => this.toast.success("Successful logout."))
+        .finally(() => {
             this.userService.setUser(null);
             this.collectionService.setCollection(null);
             this.router.navigateByUrl("login", {
                 replaceUrl: true,
             });
-        }
-
+        });
     };
+
+    private openDialog = (
+        component: ComponentType<unknown>,
+        data: object,
+        callback: (ev: string) => void
+    ) => {
+        console.log("DATA", data);
+        const ref = this.dialog.open(component, {
+            minWidth: "24rem",
+            maxWidth: "35rem",
+            enterAnimationDuration: "1000ms",
+            exitAnimationDuration: "1000ms",
+            restoreFocus: false,
+            backdropClass: "",
+            panelClass: ["w-75", "w-sm-25"],
+            data,
+        });
+        ref.afterClosed().subscribe(ev => {
+            console.log("EVENTDLG", ev);
+            callback(ev);
+        });
+    };
+
+    private tokenError = (err: string) =>
+        isExpiredSession(err as string) ? this.logout("EXPIRED SESSION")
+        : isTokenError(err as string) ? this.logout(err as string)
+        : null;
 }

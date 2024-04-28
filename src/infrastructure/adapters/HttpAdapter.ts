@@ -136,7 +136,7 @@ export class HttpAdapter<T, V> implements IHttpAdapter<T, V> {
     private handleError<V>(operation: string) {
         return (error: unknown): Observable<Resp<V>> => {
             console.log("ERRORHAND", error, error instanceof ProgressEvent);
-            let status = 600;
+            let status = (error as {status: number}).status ?? 600;
             let message = (error as Error).message ?? "ERROR 600";
             let data;
 

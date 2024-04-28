@@ -49,6 +49,7 @@ $dark-variants: (
     @include mat.checkbox-color($dark-theme);
     @include mat.menu-color($dark-theme);
     @include mat.dialog-color($dark-theme);
+    @include mat.card-color($dark-theme);
 
     @include login.theme($dark-theme); //login, signup and validation
     //@include signup.theme($dark-theme);

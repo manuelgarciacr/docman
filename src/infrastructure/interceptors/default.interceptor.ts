@@ -49,10 +49,10 @@ export const defaultInterceptor: HttpInterceptorFn = (
                             const accessToken = event.headers.get("X-ctectx"); // (body.data ?? [])[1];
 
                             if (typeof refreshToken != "string" || refreshToken == "")
-                                throw {error: "Invalid refresh token."};
+                                throw {error: "Invalid new refresh token:Token error"};
 
                             if (typeof accessToken != "string" || accessToken == "")
-                                throw {error: "Invalid access token."};
+                                throw {error: "Invalid new access token:Token error"};
 
                             userService.setRefreshToken(refreshToken);
                             userService.setAccessToken(accessToken);
@@ -72,6 +72,7 @@ export const defaultInterceptor: HttpInterceptorFn = (
                             }
                             if (message == "jwt expired") {
                                 error.message = "refresh jwt expired"
+
                             }
                             throw error;
                         })

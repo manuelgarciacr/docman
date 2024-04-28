@@ -10,15 +10,15 @@
         <mat-icon>person_remove</mat-icon>
         <span>Remove user</span>
     </button>
-    <button mat-menu-item (click)="removeAccount()">
+    <button *ngIf="isOwner()" mat-menu-item (click)="removeAccount()">
         <mat-icon [style.color]="'red'">account_circle_off</mat-icon>
         <span>Remove account</span>
     </button>
-    <button mat-menu-item disabled>
+    <button *ngIf="isOwner()" mat-menu-item (click)="accountManagement()">
         <mat-icon>manage_accounts</mat-icon>
         <span>Account management</span>
     </button>
-    <button mat-menu-item (click)="logout()">
+    <button mat-menu-item (click)="logout('')">
         <mat-icon>logout</mat-icon>
         <span>Log out</span>
     </button>

@@ -234,6 +234,8 @@ export class SignupComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     };
 
+    // Form Control helpers
+
     private getValue = (name: string) => this.signupForm.get(name)?.value;
     private trimValue = (name: string) => {
         const v = (this.getValue(name) as string).trim();
